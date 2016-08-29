@@ -3,19 +3,24 @@
 #include <stdlib.h>
 %}
 
-white [ /t]+
+white [ \t]+
 letter [A-Za-z]
 word {letter}+
 digit [0-9]
 integer {digit}+
-variable ({word}|_)({word}|{integer}|_)*
-
+variable ({word}|_)({word}|integer|_)*
 
 %%
 
 {white} { /*ignore*/ };
 "int" return   (INT);
 "=" return (ASSIGN);
+"+" return (PLUS);
+"-" return (MINUS);
+"/" return (DIVIDE);
+"*" return (TIMES);
+"(" return (LEFT_PARENTHESIS);
+")" return (RIGHT_PARENTHESIS);
 {variable} return(VARIABLE);
 {integer} {
 	yylval=atoi(yytext);
@@ -25,6 +30,7 @@ variable ({word}|_)({word}|{integer}|_)*
 "\n" return(END);
 
 %%
+
 yywrap () {
 	return 0;
 }

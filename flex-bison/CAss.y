@@ -4,16 +4,12 @@
 #include <math.h>
 %}
 
-%token INT
-%token INTEGER
-%token ASSIGN
-%token VARIABLE
-%token SEMICOLON
-%token END
-/*%token PLUS MINUS TIMES DIVIDE
-
+%token INT INTEGER ASSIGN VARIABLE SEMICOLON END
+%token PLUS MINUS TIMES DIVIDE LEFT_PARENTHESIS RIGHT_PARENTHESIS
 %left PLUS MINUS
-%right TIMES DIVIDE */
+%left TIMES DIVIDE
+%left NEG
+%right LEFT_PARENTHESIS RIGHT_PARENTHESIS
 
 %start Input
 
@@ -29,11 +25,17 @@ Line:
 	;
 Assignment:
 	INT VARIABLE ASSIGN INTEGER SEMICOLON {$$ = $4;}
-	/*| Expression PLUS Expression{$$ = $1+$3;}
-	| Expression MINUS Expression{$$ = $1-$3;}
-	| Expression TIMES Expression{$$ = $1*$3;}
-	| Expression DIVIDE Expression{$$ = $1/$3;}*/
+	| INT VARIABLE ASSIGN Expression SEMICOLON {$$ = $4;}
 	;
+Expression:
+	INTEGER {$$ = $1;}
+	| Expression PLUS Expression{printf("%d + %d\n", $1, $3);  $$ =  $1 + $3;}
+	| Expression MINUS Expression{printf("%d - %d\n", $1, $3); $$ = $1 - $3;}
+	| Expression TIMES Expression{printf("%d * %d\n", $1, $3); $$ = $1 * $3;}
+	| Expression DIVIDE Expression{printf("%d / %d\n", $1, $3); $$ = $1 / $3;}
+	| MINUS Expression %prec NEG {printf("%d = -%d\n", $2, $2); $$ = -$2;}
+	| LEFT_PARENTHESIS Expression RIGHT_PARENTHESIS { $$=$2; }
+   	;
 
 %%
 
@@ -42,5 +44,5 @@ int yyerror() {
 }	
 
 int main(void) {
-   yyparse();
+	yyparse();
 }
