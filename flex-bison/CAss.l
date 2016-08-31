@@ -32,5 +32,5 @@ variable ({word}|_)({word}|integer|_)*
 %%
 
 yywrap () {
-	return 0;
+	exit(0);
 }

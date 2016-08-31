@@ -9,4 +9,4 @@ CAss: flex-bison/CAss.l flex-bison/CAss.y
 clean:
 	rm outputs/lexico.* outputs/sintatico.* CAss
 run: 
-	./CAss
+	./CAss < in

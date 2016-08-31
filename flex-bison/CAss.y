@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+
+	extern FILE *yyin;
+	FILE *file;
 %}
 
 %token INT INTEGER ASSIGN VARIABLE SEMICOLON END
@@ -16,12 +19,14 @@
 %%
 
 Input:
-	/*Empty*/
+	/*    */
 	| Input Line
 	;
 Line:
 	END
-	| Assignment END { printf("Resultado: %d\n",$1); }
+	| Assignment END {
+		printf("Resultado: %d\n",$1); 
+	}
 	;
 Assignment:
 	INT VARIABLE ASSIGN INTEGER SEMICOLON {$$ = $4;}
@@ -29,11 +34,26 @@ Assignment:
 	;
 Expression:
 	INTEGER {$$ = $1;}
-	| Expression PLUS Expression{printf("%d + %d\n", $1, $3);  $$ =  $1 + $3;}
-	| Expression MINUS Expression{printf("%d - %d\n", $1, $3); $$ = $1 - $3;}
-	| Expression TIMES Expression{printf("%d * %d\n", $1, $3); $$ = $1 * $3;}
-	| Expression DIVIDE Expression{printf("%d / %d\n", $1, $3); $$ = $1 / $3;}
-	| MINUS Expression %prec NEG {printf("%d = -%d\n", $2, $2); $$ = -$2;}
+	| Expression PLUS Expression{
+		fprintf(file, "%d + %d\n", $1, $3);
+		$$ =  $1 + $3;
+	}
+	| Expression MINUS Expression{
+		fprintf(file, "%d - %d\n", $1, $3);
+		$$ = $1 - $3;
+	}
+	| Expression TIMES Expression{
+		fprintf(file, "%d * %d\n", $1, $3);
+		$$ = $1 * $3;
+	}
+	| Expression DIVIDE Expression{
+		fprintf(file, "%d / %d\n", $1, $3);
+		$$ = $1 / $3;
+	}
+	| MINUS Expression %prec NEG{
+		fprintf(file, "%d = -%d\n", $2, $2);
+		$$ = -$2;
+	}
 	| LEFT_PARENTHESIS Expression RIGHT_PARENTHESIS { $$=$2; }
    	;
 
@@ -41,8 +61,20 @@ Expression:
 
 int yyerror() {
 	printf("ERROR\n");
-}	
+}
 
 int main(void) {
+
+	file = fopen("compilado.txt", "r");
+
+	if(file != NULL){
+		fclose(file);
+		remove("compilado.txt");
+	}
+
+	file = fopen("compilado.txt", "a");
+
 	yyparse();
+
+	fclose(file);
 }
