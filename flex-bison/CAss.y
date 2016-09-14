@@ -7,7 +7,15 @@
 	FILE *file;
 %}
 
-%token INT INTEGER ASSIGN VARIABLE SEMICOLON END
+%union
+{
+    char *intValue;
+    char *stringValue;
+}
+
+%token <intValue> INTEGER
+%token <stringValue> VARIABLE
+%token INT ASSIGN SEMICOLON END
 %token PLUS MINUS TIMES DIVIDE LEFT_PARENTHESIS RIGHT_PARENTHESIS
 %left PLUS MINUS
 %left TIMES DIVIDE
@@ -25,12 +33,17 @@ Input:
 Line:
 	END
 	| Assignment END {
-		printf("Resultado: %d\n",$1); 
+		//printf("Resultado: %d\n",$1); 
 	}
 	;
 Assignment:
-	INT VARIABLE ASSIGN INTEGER SEMICOLON {$$ = $4;}
-	| INT VARIABLE ASSIGN Expression SEMICOLON {$$ = $4;}
+	INT VARIABLE SEMICOLON {
+		fprintf(file, "%s DQ 0\n", $2);
+	}
+	| INT VARIABLE ASSIGN INTEGER SEMICOLON {
+		fprintf(file, "%s DQ %s\n", $2, $4);
+	}
+/*	| INT VARIABLE ASSIGN Expression SEMICOLON {$$ = $4;}
 	;
 Expression:
 	INTEGER {$$ = $1;}
@@ -56,7 +69,7 @@ Expression:
 	}
 	| LEFT_PARENTHESIS Expression RIGHT_PARENTHESIS { $$=$2; }
    	;
-
+*/
 %%
 
 int yyerror() {

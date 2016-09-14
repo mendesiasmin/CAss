@@ -21,9 +21,14 @@ variable ({word}|_)({word}|integer|_)*
 "*" return (TIMES);
 "(" return (LEFT_PARENTHESIS);
 ")" return (RIGHT_PARENTHESIS);
-{variable} return(VARIABLE);
+{variable} {
+	yylval.stringValue = malloc(strlen(yytext));
+	strncpy(yylval.stringValue, yytext, strlen(yytext));
+	return(VARIABLE);
+}
 {integer} {
-	yylval=atoi(yytext);
+	yylval.intValue = malloc(strlen(yytext));
+	strncpy(yylval.intValue, yytext, strlen(yytext));
 	return (INTEGER);
 }
 ";" return (SEMICOLON);
