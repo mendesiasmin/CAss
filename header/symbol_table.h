@@ -7,7 +7,7 @@ struct Node {
 	node *next;
 }
 /* Creating list */
-node *create_list(node *list);
+node *create_list();
 /* Verify if list is empty, return 0 to false, and 1 to true */
 int is_empty(node *list);
 /* Insert a variable name in list */
