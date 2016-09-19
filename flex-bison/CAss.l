@@ -27,8 +27,7 @@ variable ({word}|_)({word}|integer|_)*
 	return(VARIABLE);
 }
 {integer} {
-	yylval.intValue = malloc(strlen(yytext));
-	strncpy(yylval.intValue, yytext, strlen(yytext));
+	yylval.intValue = atoi(yytext);
 	return (INTEGER);
 }
 ";" return (SEMICOLON);
