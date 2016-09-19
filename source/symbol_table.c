@@ -40,7 +40,7 @@ void insert_symbol(node *list, char *symbol, node *new_node) {
 		while(iterator_list != NULL) {
 			iterator_list = iterator_list->next;
 		}
-		iterator->next = new_node;
+		iterator_list->next = new_node;
 		printf("Symbol was inserted with sucess");	
 	}
 }
