@@ -24,7 +24,7 @@
 
 %token INTEGER
 %token <stringValue> VARIABLE
-%token INT ASSIGN SEMICOLON END
+%token INT ASSIGN DIFFERENT SEMICOLON END
 %token COMPARE BIGGER SMALLER BIGGER_THEN SMALLER_THEN
 %token IF ELSE
 %token PLUS MINUS TIMES DIVIDE LEFT_PARENTHESIS RIGHT_PARENTHESIS
@@ -34,7 +34,7 @@
 %right LEFT_PARENTHESIS RIGHT_PARENTHESIS
 
 %type<intValue> Expression INTEGER
-%type<bool> Conditional INTEGER
+%type<bool> Conditional
 
 %start Input
 
@@ -55,13 +55,13 @@ Line:
 	;
 Assignment:
 	INT VARIABLE SEMICOLON {
-		fprintf(file, "%s DQ 0\n", $2);
+		fprintf(file, "%s;\n", $2);
 	}
 	| INT VARIABLE ASSIGN INTEGER SEMICOLON {
-		fprintf(file, "%s DQ %d\n", $2, $4);
+		fprintf(file, "%s = %d\n", $2, $4);
 	}
 	| INT VARIABLE ASSIGN Expression SEMICOLON {
-		fprintf(file, "%s DQ %d\n", $2, $4);
+		fprintf(file, "%s = %d\n", $2, $4);
 	}
 	;
 Expression:
@@ -69,7 +69,7 @@ Expression:
 		$$ = $1;
 	}
 	| Expression PLUS Expression{
-			$$ = $1 + $3;
+		$$ = $1 + $3;
 
 	}
 	| Expression MINUS Expression{
@@ -85,19 +85,16 @@ Expression:
 		$$ = -$2;
 	}
 	| LEFT_PARENTHESIS Expression RIGHT_PARENTHESIS {
-		$$=$2;
+		$$ = $2;
 	}
    	;
 If_statement:
 	IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
-
+		fprintf(file, "if(%d)\n", $3);
 	}
 Conditional:
-	INTEGER {
-		
-	}
-	| INTEGER COMPARE INTEGER{
-		fprintf(file, "==\n");
+	INTEGER COMPARE INTEGER{
+		$$ = true;
 	}
 %%
 
