@@ -14,6 +14,11 @@ variable ({word}|_)({word}|integer|_)*
 
 {white} { /*ignore*/ };
 "int" return   (INT);
+"==" return (COMPARE);
+"<=" return (SMALLER);
+">=" return (BIGGER);
+"<" return (SMALLER_THEN);
+">" return (BIGGER_THEN);
 "=" return (ASSIGN);
 "+" return (PLUS);
 "-" return (MINUS);

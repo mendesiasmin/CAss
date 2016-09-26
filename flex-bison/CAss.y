@@ -9,10 +9,14 @@
 	FILE *file;
 	char *variable;
 
+	#define true 1
+	#define false 0
+
 %}
 
 %union
 {
+	int bool;
     int intValue;
     char *stringValue;
 }
@@ -21,6 +25,8 @@
 %token INTEGER
 %token <stringValue> VARIABLE
 %token INT ASSIGN SEMICOLON END
+%token COMPARE BIGGER SMALLER BIGGER_THEN SMALLER_THEN
+%token IF ELSE
 %token PLUS MINUS TIMES DIVIDE LEFT_PARENTHESIS RIGHT_PARENTHESIS
 %left PLUS MINUS
 %left TIMES DIVIDE
@@ -28,6 +34,7 @@
 %right LEFT_PARENTHESIS RIGHT_PARENTHESIS
 
 %type<intValue> Expression INTEGER
+%type<bool> Conditional INTEGER
 
 %start Input
 
@@ -41,6 +48,9 @@ Line:
 	END
 	| Assignment END {
 		//printf("Resultado: %d\n",$1); 
+	}
+	| If_statement END{
+
 	}
 	;
 Assignment:
@@ -74,8 +84,21 @@ Expression:
 	| MINUS Expression %prec NEG{
 		$$ = -$2;
 	}
-	| LEFT_PARENTHESIS Expression RIGHT_PARENTHESIS { $$=$2; }
+	| LEFT_PARENTHESIS Expression RIGHT_PARENTHESIS {
+		$$=$2;
+	}
    	;
+If_statement:
+	IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
+
+	}
+Conditional:
+	INTEGER {
+		
+	}
+	| INTEGER COMPARE INTEGER{
+		fprintf(file, "==\n");
+	}
 %%
 
 int yyerror() {
