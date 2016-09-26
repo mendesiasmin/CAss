@@ -1,3 +1,4 @@
 int h;
 int x = 9;
+int x = 9 + 1 - 2;
 if(2==1)

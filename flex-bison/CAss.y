@@ -24,7 +24,7 @@
 
 %token INTEGER
 %token <stringValue> VARIABLE
-%token INT ASSIGN DIFFERENT SEMICOLON END
+%token INT ASSIGN SEMICOLON END
 %token COMPARE BIGGER SMALLER BIGGER_THEN SMALLER_THEN
 %token IF ELSE
 %token PLUS MINUS TIMES DIVIDE LEFT_PARENTHESIS RIGHT_PARENTHESIS
@@ -58,10 +58,10 @@ Assignment:
 		fprintf(file, "%s;\n", $2);
 	}
 	| INT VARIABLE ASSIGN INTEGER SEMICOLON {
-		fprintf(file, "%s = %d\n", $2, $4);
+		fprintf(file, "%s DQ %d\n", $2, $4);
 	}
 	| INT VARIABLE ASSIGN Expression SEMICOLON {
-		fprintf(file, "%s = %d\n", $2, $4);
+		fprintf(file, "%s DQ %d\n", $2, $4);
 	}
 	;
 Expression:
@@ -91,6 +91,9 @@ Expression:
 If_statement:
 	IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
 		fprintf(file, "if(%d)\n", $3);
+	}
+	| If_statement ELSE{
+		fprintf(file, "else\n");
 	}
 Conditional:
 	INTEGER COMPARE INTEGER{
