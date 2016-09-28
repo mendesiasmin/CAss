@@ -47,7 +47,7 @@ Input:
 Line:
 	END
 	| Assignment END {
-		//printf("Resultado: %d\n",$1); 
+		//printf("Resultado: %d\n",$1);
 	}
 	| If_statement END{
 
@@ -70,7 +70,6 @@ Expression:
 	}
 	| Expression PLUS Expression{
 		$$ = $1 + $3;
-
 	}
 	| Expression MINUS Expression{
 		$$ = $1 - $3;
@@ -90,14 +89,29 @@ Expression:
    	;
 If_statement:
 	IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
-		fprintf(file, "if(%d)\n", $3);
+		fprintf(file, "if\n");
 	}
 	| If_statement ELSE{
 		fprintf(file, "else\n");
 	}
+	| If_statement ELSE If_statement{
+		fprintf(file, "else if ");
+	}
 Conditional:
 	INTEGER COMPARE INTEGER{
-		$$ = true;
+		fprintf(file, "	== ");
+	}
+	| INTEGER SMALLER_THEN INTEGER{
+		fprintf(file, "	< ");
+	}
+	| INTEGER BIGGER_THEN INTEGER{
+		fprintf(file, " > ");
+	}
+	| INTEGER SMALLER INTEGER{
+		fprintf(file, "	<= ");
+	}
+	| INTEGER BIGGER INTEGER{
+		fprintf(file, " >= ");
 	}
 %%
 
