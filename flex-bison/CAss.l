@@ -13,7 +13,10 @@ variable ({word}|_)({word}|integer|_)*
 %%
 
 {white} { /*ignore*/ };
-"int" return   (INT);
+"int" return (INT);
+"if" return (IF);
+"else" return (ELSE);
+"else if" return (ELSE_IF);
 "==" return (COMPARE);
 "<=" return (SMALLER);
 ">=" return (BIGGER);

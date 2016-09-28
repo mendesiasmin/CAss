@@ -27,7 +27,7 @@
 %token <stringValue> VARIABLE
 %token INT ASSIGN SEMICOLON END
 %token COMPARE BIGGER SMALLER BIGGER_THEN SMALLER_THEN
-%token IF ELSE
+%token IF ELSE ELSE_IF
 %token PLUS MINUS TIMES DIVIDE LEFT_PARENTHESIS RIGHT_PARENTHESIS
 %left PLUS MINUS
 %left TIMES DIVIDE
@@ -35,7 +35,6 @@
 %right LEFT_PARENTHESIS RIGHT_PARENTHESIS
 
 %type<intValue> Expression INTEGER
-
 
 %start Input
 
@@ -48,11 +47,15 @@ Input:
 Line:
 	END
 	| Assignment END {
-		//printf("Resultado: %d\n",$1); 
+		//printf("Resultado: %d\n",$1);
+	}
+	| If_statement END {
+
 	}
 	;
 Assignment:
 	INT VARIABLE SEMICOLON {
+
 		if(find_symbol(symbol, $2, "main")) {
 			yyerror(1, $2);
 		} else {
@@ -85,8 +88,7 @@ Expression:
 		$$ = $1;
 	}
 	| Expression PLUS Expression{
-			$$ = $1 + $3;
-
+		$$ = $1 + $3;
 	}
 	| Expression MINUS Expression{
 		$$ = $1 - $3;
@@ -101,20 +103,43 @@ Expression:
 		$$ = -$2;
 	}
 	| LEFT_PARENTHESIS Expression RIGHT_PARENTHESIS {
-		$$=$2;
+		$$ = $2;
 	}
    	;
-/*If_statement:
+If_statement:
 	IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
-
+		fprintf(file, "if\n");
 	}
+	| ELSE_IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
+		fprintf(file, "else if\n");
+	}
+	| ELSE{
+		fprintf(file, "else\n");
+	}
+	;
 Conditional:
-	INTEGER {
-		
+	Operandor COMPARE Operandor{
+		fprintf(file, "	== ");
 	}
-	| INTEGER COMPARE INTEGER{
-		fprintf(file, "==\n");
-	}*/
+	| Operandor SMALLER_THEN Operandor{
+		fprintf(file, "	< ");
+	}
+	| Operandor BIGGER_THEN Operandor{
+		fprintf(file, " > ");
+	}
+	| Operandor SMALLER Operandor{
+		fprintf(file, "	<= ");
+	}
+	| Operandor BIGGER Operandor{
+		fprintf(file, " >= ");
+	}
+	;
+Operandor:
+	VARIABLE{
+	}
+	| Expression{
+	}
+	;
 %%
 
 int yyerror(int typeError, char* variable) {
