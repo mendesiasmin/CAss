@@ -26,7 +26,7 @@
 %token <stringValue> VARIABLE
 %token INT ASSIGN SEMICOLON END
 %token COMPARE BIGGER SMALLER BIGGER_THEN SMALLER_THEN
-%token IF ELSE
+%token IF ELSE ELSE_IF
 %token PLUS MINUS TIMES DIVIDE LEFT_PARENTHESIS RIGHT_PARENTHESIS
 %left PLUS MINUS
 %left TIMES DIVIDE
@@ -92,11 +92,26 @@ If_statement:
 	IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
 		fprintf(file, "if(%d)\n", $3);
 	}
-	| If_statement ELSE{
+	| ELSE_IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
+		fprintf(file, "else if(%d)\n", $3);
+	}
+	| ELSE{
 		fprintf(file, "else\n");
 	}
 Conditional:
 	INTEGER COMPARE INTEGER{
+		$$ = true;
+	}
+	| INTEGER SMALLER INTEGER{
+		$$ = true;
+	}
+	| INTEGER BIGGER INTEGER{
+		$$ = true;
+	}
+	| INTEGER SMALLER_THEN INTEGER{
+		$$ = true;
+	}
+	| INTEGER BIGGER_THEN INTEGER{
 		$$ = true;
 	}
 %%

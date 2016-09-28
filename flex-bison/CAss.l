@@ -16,6 +16,7 @@ variable ({word}|_)({word}|integer|_)*
 "int" return (INT);
 "if" return (IF);
 "else" return (ELSE);
+"else if" return (ELSE_IF);
 "==" return (COMPARE);
 "<=" return (SMALLER);
 ">=" return (BIGGER);
