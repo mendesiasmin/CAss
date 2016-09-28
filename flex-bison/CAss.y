@@ -113,18 +113,6 @@ Conditional:
 	| INTEGER BIGGER INTEGER{
 		fprintf(file, " >= ");
 	}
-	| INTEGER SMALLER INTEGER{
-		$$ = true;
-	}
-	| INTEGER BIGGER INTEGER{
-		$$ = true;
-	}
-	| INTEGER SMALLER_THEN INTEGER{
-		$$ = true;
-	}
-	| INTEGER BIGGER_THEN INTEGER{
-		$$ = true;
-	}
 %%
 
 int yyerror() {
