@@ -38,6 +38,8 @@ variable ({word}|_)({word}|integer|_)*
 	yylval.intValue = atoi(yytext);
 	return (INTEGER);
 }
+"{" return (LEFT_KEY);
+"}" return (RIGHT_KEY);
 ";" return (SEMICOLON);
 "\n" return(END);
 

@@ -59,13 +59,15 @@ extern int yydebug;
     IF = 269,
     ELSE = 270,
     ELSE_IF = 271,
-    PLUS = 272,
-    MINUS = 273,
-    TIMES = 274,
-    DIVIDE = 275,
-    LEFT_PARENTHESIS = 276,
-    RIGHT_PARENTHESIS = 277,
-    NEG = 278
+    LEFT_KEY = 272,
+    RIGHT_KEY = 273,
+    PLUS = 274,
+    MINUS = 275,
+    TIMES = 276,
+    DIVIDE = 277,
+    LEFT_PARENTHESIS = 278,
+    RIGHT_PARENTHESIS = 279,
+    NEG = 280
   };
 #endif
 
@@ -80,7 +82,7 @@ union YYSTYPE
     int intValue;
     char *stringValue;
 
-#line 84 "CAss.tab.h" /* yacc.c:1909  */
+#line 86 "CAss.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;
