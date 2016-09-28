@@ -97,9 +97,6 @@ If_statement:
 	| ELSE{
 		fprintf(file, "else\n");
 	}
-	| If_statement ELSE If_statement{
-		fprintf(file, "else if ");
-	}
 Conditional:
 	INTEGER COMPARE INTEGER{
 		fprintf(file, "	== ");
