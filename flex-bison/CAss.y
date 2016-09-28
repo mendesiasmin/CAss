@@ -98,20 +98,25 @@ If_statement:
 		fprintf(file, "else\n");
 	}
 Conditional:
-	INTEGER COMPARE INTEGER{
+	Operandor COMPARE Operandor{
 		fprintf(file, "	== ");
 	}
-	| INTEGER SMALLER_THEN INTEGER{
+	| Operandor SMALLER_THEN Operandor{
 		fprintf(file, "	< ");
 	}
-	| INTEGER BIGGER_THEN INTEGER{
+	| Operandor BIGGER_THEN Operandor{
 		fprintf(file, " > ");
 	}
-	| INTEGER SMALLER INTEGER{
+	| Operandor SMALLER Operandor{
 		fprintf(file, "	<= ");
 	}
-	| INTEGER BIGGER INTEGER{
+	| Operandor BIGGER Operandor{
 		fprintf(file, " >= ");
+	}
+Operandor:
+	VARIABLE{
+	}
+	| Expression{
 	}
 %%
 
