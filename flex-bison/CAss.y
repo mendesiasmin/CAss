@@ -62,7 +62,7 @@ Assignment:
 			symbol = insert_symbol(symbol, variable, "main");
 		}
 	}
-	| INT VARIABLE ASSIGN INTEGER SEMICOLON {
+	| INT VARIABLE ASSIGN Expression SEMICOLON {
 		if(find_symbol(symbol, $2, "main")) {
 			yyerror(1, $2);
 		} else {
@@ -72,14 +72,11 @@ Assignment:
 			symbol = insert_symbol(symbol, variable, "main");
 		}
 	}
-	| INT VARIABLE ASSIGN Expression SEMICOLON {
-		if(find_symbol(symbol, $2, "main")) {
-			yyerror(1, $2);
+	| VARIABLE ASSIGN Expression SEMICOLON {
+		if(find_symbol(symbol, $1, "main")) {
+			fprintf(file, "ADD %s, %d\n", $1, $3);
 		} else {
-			fprintf(file, "%s DQ %d\n", $2, $4);
-			char* variable = (char*)malloc(sizeof(strlen($2)));
-			strcpy(variable, $2);
-			symbol = insert_symbol(symbol, variable, "main");
+			yyerror(2, $1);
 		}
 	}
 	;
@@ -128,6 +125,8 @@ int yyerror(int typeError, char* variable) {
 		case 1:
 			printf("Variavel %s ja declarada\n", variable);
 			break;
+		case 2:
+			printf("Variavel %s nao foi declarada\n", variable);
 		//default:
 			//nothing to do
 	}
