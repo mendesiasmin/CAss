@@ -18,10 +18,14 @@ variable ({word}|_)({word}|integer|_)*
 "else" return (ELSE);
 "else if" return (ELSE_IF);
 "==" return (COMPARE);
+"!=" return (DIFFERENT);
 "<=" return (SMALLER);
 ">=" return (BIGGER);
 "<" return (SMALLER_THEN);
 ">" return (BIGGER_THEN);
+"!" return (NOT);
+"&&" return (AND);
+"||" return (OR);
 "=" return (ASSIGN);
 "+" return (PLUS);
 "-" return (MINUS);
