@@ -1,2 +1,6 @@
 int h;
-int x = 9;
+int h;
+int p;
+int h = 2 + 2;
+int p = 3 + 3;
+int k = 4 + 4;

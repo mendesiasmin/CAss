@@ -12,11 +12,12 @@
 	#define true 1
 	#define false 0
 
+	node *symbol;
+
 %}
 
 %union
 {
-	int bool;
     int intValue;
     char *stringValue;
 }
@@ -34,7 +35,7 @@
 %right LEFT_PARENTHESIS RIGHT_PARENTHESIS
 
 %type<intValue> Expression INTEGER
-%type<bool> Conditional INTEGER
+
 
 %start Input
 
@@ -49,19 +50,37 @@ Line:
 	| Assignment END {
 		//printf("Resultado: %d\n",$1); 
 	}
-	| If_statement END{
-
-	}
 	;
 Assignment:
 	INT VARIABLE SEMICOLON {
-		fprintf(file, "%s DQ 0\n", $2);
+		if(find_symbol(symbol, $2, "main")) {
+			yyerror(1, $2);
+		} else {
+			fprintf(file ,"%s DQ 0\n", $2);
+			char* variable = (char*)malloc(sizeof(strlen($2)));
+			strcpy(variable, $2);
+			symbol = insert_symbol(symbol, variable, "main");
+		}
 	}
 	| INT VARIABLE ASSIGN INTEGER SEMICOLON {
-		fprintf(file, "%s DQ %d\n", $2, $4);
+		if(find_symbol(symbol, $2, "main")) {
+			yyerror(1, $2);
+		} else {
+			fprintf(file, "%s DQ %d\n", $2, $4);
+			char* variable = (char*)malloc(sizeof(strlen($2)));
+			strcpy(variable, $2);
+			symbol = insert_symbol(symbol, variable, "main");
+		}
 	}
 	| INT VARIABLE ASSIGN Expression SEMICOLON {
-		fprintf(file, "%s DQ %d\n", $2, $4);
+		if(find_symbol(symbol, $2, "main")) {
+			yyerror(1, $2);
+		} else {
+			fprintf(file, "%s DQ %d\n", $2, $4);
+			char* variable = (char*)malloc(sizeof(strlen($2)));
+			strcpy(variable, $2);
+			symbol = insert_symbol(symbol, variable, "main");
+		}
 	}
 	;
 Expression:
@@ -88,7 +107,7 @@ Expression:
 		$$=$2;
 	}
    	;
-If_statement:
+/*If_statement:
 	IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
 
 	}
@@ -98,16 +117,28 @@ Conditional:
 	}
 	| INTEGER COMPARE INTEGER{
 		fprintf(file, "==\n");
-	}
+	}*/
 %%
 
-int yyerror() {
-	printf("ERROR\n");
+int yyerror(int typeError, char* variable) {
+
+	printf("ERROR:\n");
+
+	switch(typeError) {
+		case 1:
+			printf("Variavel %s ja declarada\n", variable);
+			break;
+		//default:
+			//nothing to do
+	}
+	exit(0);
 }
 
 int main(void) {
 
-	node *symbol = create_list();
+
+	symbol = create_list();
+
 	file = fopen("compilado.txt", "r");
 
 	if(file != NULL){
