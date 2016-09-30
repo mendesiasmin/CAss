@@ -1,0 +1,9 @@
+flex-bison/CAss.y~
+header/symbol_table.h~
+in~
+source/symbol_table.c~
+CAss
+outputs/lexico.c
+outputs/lexico.h
+compilado.txt
+in
