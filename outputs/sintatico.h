@@ -51,13 +51,14 @@ extern int yydebug;
     ASSIGN = 261,
     SEMICOLON = 262,
     END = 263,
-    PLUS = 264,
-    MINUS = 265,
-    TIMES = 266,
-    DIVIDE = 267,
-    LEFT_PARENTHESIS = 268,
-    RIGHT_PARENTHESIS = 269,
-    NEG = 270
+    TAB = 264,
+    PLUS = 265,
+    MINUS = 266,
+    TIMES = 267,
+    DIVIDE = 268,
+    LEFT_PARENTHESIS = 269,
+    RIGHT_PARENTHESIS = 270,
+    NEG = 271
   };
 #endif
 
@@ -66,12 +67,12 @@ extern int yydebug;
 
 union YYSTYPE
 {
-#line 11 "flex-bison/CAss.y" /* yacc.c:1909  */
+#line 15 "flex-bison/CAss.y" /* yacc.c:1909  */
 
-    char *intValue;
+    int intValue;
     char *stringValue;
 
-#line 75 "CAss.tab.h" /* yacc.c:1909  */
+#line 76 "CAss.tab.h" /* yacc.c:1909  */
 };
 
 typedef union YYSTYPE YYSTYPE;

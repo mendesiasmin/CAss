@@ -20,7 +20,7 @@
 
 %token INTEGER
 %token <stringValue> VARIABLE
-%token INT ASSIGN SEMICOLON END
+%token INT ASSIGN SEMICOLON END TAB
 %token PLUS MINUS TIMES DIVIDE LEFT_PARENTHESIS RIGHT_PARENTHESIS
 %left PLUS MINUS
 %left TIMES DIVIDE
@@ -40,18 +40,24 @@ Input:
 Line:
 	END
 	| Assignment END {
-		//printf("Resultado: %d\n",$1); 
+		
 	}
 	;
 Assignment:
 	INT VARIABLE SEMICOLON {
-		fprintf(file, "%s DQ 0\n", $2);
+		
 	}
 	| INT VARIABLE ASSIGN INTEGER SEMICOLON {
-		fprintf(file, "%s DQ %d\n", $2, $4);
+		fprintf(file, "mov\tDWORD PTR [rbp-4], %d\n", $4);
 	}
 	| INT VARIABLE ASSIGN Expression SEMICOLON {
-		fprintf(file, "%s DQ %d\n", $2, $4);
+		fprintf(file, "mov\tDWORD PTR [rbp-4], %d\n", $4);
+	}
+	| VARIABLE ASSIGN INTEGER SEMICOLON{
+		fprintf(file, "mov\tDWORD PTR [rbp-8], %d\n", $3);
+	}
+	| VARIABLE ASSIGN Expression SEMICOLON{
+		fprintf(file, "mov\tDWORD PTR [rbp-8], %d\n", $3);
 	}
 	;
 Expression:
@@ -59,7 +65,7 @@ Expression:
 		$$ = $1;
 	}
 	| Expression PLUS Expression{
-			$$ = $1 + $3;
+		$$ = $1 + $3;
 
 	}
 	| Expression MINUS Expression{
@@ -74,7 +80,9 @@ Expression:
 	| MINUS Expression %prec NEG{
 		$$ = -$2;
 	}
-	| LEFT_PARENTHESIS Expression RIGHT_PARENTHESIS { $$=$2; }
+	| LEFT_PARENTHESIS Expression RIGHT_PARENTHESIS{
+		$$=$2;
+	}
    	;
 %%
 
