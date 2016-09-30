@@ -74,7 +74,7 @@ extern int yydebug;
 typedef union YYSTYPE YYSTYPE;
 union YYSTYPE
 {
-#line 20 "flex-bison/CAss.y" /* yacc.c:1909  */
+#line 22 "flex-bison/CAss.y" /* yacc.c:1909  */
 
     int intValue;
     char *stringValue;

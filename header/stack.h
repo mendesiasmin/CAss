@@ -5,19 +5,19 @@
 #include <math.h>
 #endif
 
-typedef struct Node node;
+typedef struct Stack stack;
 
-struct Node {
+struct Stack {
 	char *scope;
-	node *next;
+	stack *next;
 };
 
 /* Creating stack */
-node *create_stack();
+stack *create_stack();
 /* Verify if stack is empty, return 0 to false, and 1 to true */
 
-node* insert_scope(node *list, char *scope);
+stack* insert_scope(stack *list, char *scope);
 
-char* take_scope(node *list);
+char* take_scope(stack *list);
 
-node* delete_scope(node* list);
+stack* delete_scope(stack* list);

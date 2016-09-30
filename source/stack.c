@@ -4,34 +4,40 @@
 #define FALSE 0
 #endif
 
-node *create_stack() {
+stack *create_stack() {
 	return NULL;
 }
 
-node* insert_scope(node *list, char *scope) {
+stack *insert_scope(stack *list, char *scope) {
 
-	node *new_node = (node*) malloc(sizeof(node));
+	stack *new_stack = (stack*) malloc(sizeof(stack));
 
-	new_node->next = NULL;
-	new_node->scope = (char*)malloc(sizeof(strlen(scope)));
+	new_stack->next = NULL;
+	new_stack->scope = (char*)malloc(sizeof(strlen(scope)));
 
-	strcpy(new_node->scope, scope);
+	strcpy(new_stack->scope, scope);
 
 	if(is_empty(list)) {
-		list = new_node;
+		list = new_stack;
 	} else {
-		new_node->next = list;
-		list = new_node;
+		new_stack->next = list;
+		list = new_stack;
 		printf("Symbol was inserted with sucess\n");	
 	}
 	return list;
 }
 
-node* delete_scope(node* list) {
-	node* aux = list;
+stack *delete_scope(stack* list) {
+	stack* aux = list;
 	list = list->next;
 	free(aux);
+
+	return list;
 }
-char* take_scope(node *list) {
-	return list->scope;
+char *take_scope(stack *list) {
+	printf("Qual o escopo dessa merda? %s\n", list->scope);
+	char* scope = (char*) malloc(sizeof(char)*strlen(list->scope));
+	strcpy(scope, list->scope);
+
+	return scope;
 }
