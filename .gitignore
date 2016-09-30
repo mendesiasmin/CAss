@@ -8,3 +8,6 @@ flex-bison/CAss.l~
 Makefile~
 header/stack.h~
 source/stack.c~
+in.txt~
+parser.c~
+prog

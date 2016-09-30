@@ -9,12 +9,38 @@
 	extern FILE *yyin;
 	FILE *file;
 	char *variable;
+	int numberScope = 0;
 
 #define true 1
 #define false 0
 
 	node *symbol;
 	stack *scopeOfFunction;
+
+char* scopeGenerator() {
+
+	char *validchars = "abcdefghijklmnopqrstuvwxiz";
+	char *novastr;
+
+	int str_len;
+
+	// tamanho da string
+	str_len = 10 + (rand() % 10);
+
+	// aloca memoria
+	novastr = (char*)malloc((str_len + 1)* sizeof(char));
+	
+	int i;
+
+	for ( i = 0; i < str_len; i++ ) {
+		novastr[i] = validchars[ rand() % strlen(validchars) ];
+		novastr[i + 1] = 0x0;
+	}
+
+	printf("string gerada %s \n", novastr);
+
+	return novastr;
+}
 
 %}
 
@@ -55,10 +81,12 @@ Line:
 	| If_statement END {
 	}
 	| LEFT_KEY {
-		printf("entrouif\n");
+		scopeOfFunction = insert_scope(scopeOfFunction, scopeGenerator());
+		printf("Scopo disso tudo adicionado %s\n", scopeOfFunction->scope);
 	}
 	| RIGHT_KEY {
-		printf("fechoutif\n");
+		printf("Scopo disso tudo deletado %s\n", scopeOfFunction->scope);
+		scopeOfFunction = delete_scope(scopeOfFunction);
 	}
 	;
 Assignment:
@@ -121,14 +149,12 @@ Expression:
    	;
 If_statement:
 	IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS {
-		scopeOfFunction = insert_scope(scopeOfFunction, "if");
 		fprintf(file, "if\n");
 	}
 	| ELSE_IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
 		fprintf(file, "else if\n");
 	}
 	| ELSE {
-		scopeOfFunction = insert_scope(scopeOfFunction, "else");
 		fprintf(file, "else\n");
 	}
 Conditional:

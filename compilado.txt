@@ -7,3 +7,4 @@ k DQ 8
 ADD p, 3
 else
 i DQ 2
+	== if
