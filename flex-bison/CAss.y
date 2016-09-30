@@ -31,7 +31,7 @@
 %left PLUS MINUS
 %left TIMES DIVIDE
 %left NEG
-%right LEFT_PARENTHESIS RIGHT_PARENTHESIS
+%right LEFT_PARENTHESIS RIGHT_PARENTHESIS LEFT_KEY RIGHT_KEY
 
 %type<intValue> Expression INTEGER
 
@@ -96,6 +96,9 @@ If_statement:
 	| ELSE{
 		fprintf(file, "else\n");
 	}
+	| If_statement LEFT_KEY RIGHT_KEY{
+		fprintf(file, "{}\n");
+	}
 Conditional:
 	Operandor COMPARE Operandor{
 		fprintf(file, "	== ");
@@ -126,6 +129,9 @@ Conditional:
 	}
 	| NOT LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
 		fprintf(file, "NOT Conditional ");
+	}
+	| LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
+
 	}
 Operandor:
 	VARIABLE{
