@@ -41,3 +41,14 @@ char *take_scope(stack *list) {
 
 	return scope;
 }
+int find_scope(stack *list, char* scope) {
+	stack *iterator_list = list;
+
+	while(iterator_list != NULL) {
+		if(strcmp(scope, iterator_list->scope) == 0) {
+			return TRUE;
+		}
+		iterator_list = iterator_list->next;
+	}
+	return FALSE;
+}

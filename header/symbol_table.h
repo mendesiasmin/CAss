@@ -20,6 +20,6 @@ int is_empty(node *list);
 /* Insert a variable name in list */
 node* insert_symbol(node *list, char *symbol, char *scope);
 /* Search the variable name in the same scope */
-int find_symbol(node *list, char *symbol, char *scope);
-
+int find_symbol(node *list, char *symbol);
 void imprime(node *list);
+char* take_scope_of_symbol(node *list, char *symbol);

@@ -1315,7 +1315,7 @@ yyreduce:
     {
 
 		printf("Scopo dessa budega %s\n", scopeOfFunction->scope);
-		if(find_symbol(symbol, (yyvsp[-1].stringValue), scopeOfFunction->scope)) {
+		if(find_symbol(symbol, (yyvsp[-1].stringValue))) {
 			yyerror(1, (yyvsp[-1].stringValue));
 		} else {
 			fprintf(file ,"%s DQ 0\n", (yyvsp[-1].stringValue));
@@ -1332,7 +1332,7 @@ yyreduce:
     {
 		printf("Scopo dessa budega %s\n", scopeOfFunction->scope);
 
-		if(find_symbol(symbol, (yyvsp[-3].stringValue), scopeOfFunction->scope)) {
+		if(find_symbol(symbol, (yyvsp[-3].stringValue))) {
 			yyerror(1, (yyvsp[-3].stringValue));
 		} else {
 			fprintf(file, "%s DQ %d\n", (yyvsp[-3].stringValue), (yyvsp[-1].intValue));
@@ -1349,7 +1349,7 @@ yyreduce:
     {
 		printf("Scopo dessa budega %s\n", scopeOfFunction->scope);
 
-		if(find_symbol(symbol, (yyvsp[-3].stringValue), scopeOfFunction->scope)) {
+		if(find_symbol(symbol, (yyvsp[-3].stringValue)) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, (yyvsp[-3].stringValue)))) {
 			fprintf(file, "ADD %s, %d\n", (yyvsp[-3].stringValue), (yyvsp[-1].intValue));
 		} else {
 			yyerror(2, (yyvsp[-3].stringValue));

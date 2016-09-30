@@ -60,7 +60,7 @@ Assignment:
 	INT VARIABLE SEMICOLON {
 
 		printf("Scopo dessa budega %s\n", scopeOfFunction->scope);
-		if(find_symbol(symbol, $2, scopeOfFunction->scope)) {
+		if(find_symbol(symbol, $2)) {
 			yyerror(1, $2);
 		} else {
 			fprintf(file ,"%s DQ 0\n", $2);
@@ -72,7 +72,7 @@ Assignment:
 	| INT VARIABLE ASSIGN Expression SEMICOLON {
 		printf("Scopo dessa budega %s\n", scopeOfFunction->scope);
 
-		if(find_symbol(symbol, $2, scopeOfFunction->scope)) {
+		if(find_symbol(symbol, $2)) {
 			yyerror(1, $2);
 		} else {
 			fprintf(file, "%s DQ %d\n", $2, $4);
@@ -84,7 +84,7 @@ Assignment:
 	| VARIABLE ASSIGN Expression SEMICOLON {
 		printf("Scopo dessa budega %s\n", scopeOfFunction->scope);
 
-		if(find_symbol(symbol, $1, scopeOfFunction->scope)) {
+		if(find_symbol(symbol, $1) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $1))) {
 			fprintf(file, "ADD %s, %d\n", $1, $3);
 		} else {
 			yyerror(2, $1);

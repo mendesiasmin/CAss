@@ -48,10 +48,8 @@ void imprime(node *list) {
 	}
 }
 
-int find_symbol(node *list, char *symbol, char *scope) {
+int find_symbol(node *list, char *symbol) {
 	node *iterator_list = list;
-
-	imprime(list);
 
 	while(iterator_list != NULL) {
 		if(strcmp(symbol, iterator_list->symbol) == 0) {
@@ -63,4 +61,16 @@ int find_symbol(node *list, char *symbol, char *scope) {
 	
 	/* If this function arrived here the list don't have the symbol */
 	return FALSE;
+}
+
+char* take_scope_of_symbol(node *list, char *symbol) {
+	node *iterator_list = list;
+
+	while(iterator_list != NULL) {
+		if(strcmp(symbol, iterator_list->symbol) == 0) {
+			return iterator_list->scope;
+		}
+		iterator_list = iterator_list->next;
+	}
+	return "global";
 }
