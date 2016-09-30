@@ -85,37 +85,41 @@ Expression:
 	| LEFT_PARENTHESIS Expression RIGHT_PARENTHESIS {
 		$$ = $2;
 	}
-   	;
+  ;
 If_statement:
-	IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS LEFT_KEY RIGHT_KEY{
+	IF Conditional {
 		fprintf(file, "if\n");
 	}
-	| ELSE_IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
+	| ELSE_IF Conditional{
 		fprintf(file, "else if\n");
 	}
 	| ELSE{
 		fprintf(file, "else\n");
 	}
-	| If_statement LEFT_KEY RIGHT_KEY{
+	| If_statement LEFT_KEY {
 		fprintf(file, "{}\n");
 	}
+
 Conditional:
-	Operandor COMPARE Operandor{
+	Operand{
+
+	}
+	| Operand COMPARE Operand{
 		fprintf(file, "	== ");
 	}
-	| Operandor DIFFERENT Operandor{
+	| Operand DIFFERENT Operand{
 		fprintf(file, "	!= ");
 	}
-	| Operandor SMALLER_THEN Operandor{
+	| Operand SMALLER_THEN Operand{
 		fprintf(file, "	< ");
 	}
-	| Operandor BIGGER_THEN Operandor{
+	| Operand BIGGER_THEN Operand{
 		fprintf(file, " > ");
 	}
-	| Operandor SMALLER Operandor{
+	| Operand SMALLER Operand{
 		fprintf(file, "	<= ");
 	}
-	| Operandor BIGGER Operandor{
+	| Operand BIGGER Operand{
 		fprintf(file, " >= ");
 	}
 	| Conditional AND Conditional{
@@ -124,16 +128,13 @@ Conditional:
 	| Conditional OR Conditional{
 		fprintf(file, " OR	 ");
 	}
-	| NOT Operandor{
-		fprintf(file, " NOT ");
-	}
-	| NOT LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
+	| NOT Conditional {
 		fprintf(file, "NOT Conditional ");
 	}
 	| LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
 
 	}
-Operandor:
+Operand:
 	VARIABLE{
 	}
 	| Expression{
