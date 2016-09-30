@@ -5,3 +5,8 @@ source/symbol_table.c~
 .gitignore~
 compilado.txt~
 flex-bison/CAss.l~
+Makefile~
+header/stack.h
+header/stack.h~
+source/stack.c
+source/stack.c~
