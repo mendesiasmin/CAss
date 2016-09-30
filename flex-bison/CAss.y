@@ -53,14 +53,19 @@ Line:
 		//printf("Resultado: %d\n",$1);
 	}
 	| If_statement END {
-
+	}
+	| LEFT_KEY {
+		printf("entrouif\n");
+	}
+	| RIGHT_KEY {
+		printf("fechoutif\n");
 	}
 	;
 Assignment:
 	INT VARIABLE SEMICOLON {
-
 		printf("Scopo dessa budega %s\n", scopeOfFunction->scope);
-		if(find_symbol(symbol, $2)) {
+
+		if(find_symbol(symbol, $2) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $2))) {
 			yyerror(1, $2);
 		} else {
 			fprintf(file ,"%s DQ 0\n", $2);
@@ -72,7 +77,7 @@ Assignment:
 	| INT VARIABLE ASSIGN Expression SEMICOLON {
 		printf("Scopo dessa budega %s\n", scopeOfFunction->scope);
 
-		if(find_symbol(symbol, $2)) {
+		if(find_symbol(symbol, $2) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $2))) {
 			yyerror(1, $2);
 		} else {
 			fprintf(file, "%s DQ %d\n", $2, $4);
@@ -115,19 +120,16 @@ Expression:
 	}
    	;
 If_statement:
-	IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS LEFT_KEY RIGHT_KEY{
+	IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS {
 		scopeOfFunction = insert_scope(scopeOfFunction, "if");
 		fprintf(file, "if\n");
 	}
 	| ELSE_IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
 		fprintf(file, "else if\n");
 	}
-	| ELSE{
+	| ELSE {
 		scopeOfFunction = insert_scope(scopeOfFunction, "else");
 		fprintf(file, "else\n");
-	}
-	| If_statement LEFT_KEY RIGHT_KEY{
-		fprintf(file, "{}\n");
 	}
 Conditional:
 	Operandor COMPARE Operandor{

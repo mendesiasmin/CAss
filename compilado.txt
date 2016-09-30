@@ -4,3 +4,6 @@ ADD h, 4
 ADD p, 6
 	== if
 k DQ 8
+ADD p, 3
+else
+i DQ 2
