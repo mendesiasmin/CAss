@@ -2,4 +2,5 @@ h DQ 0
 p DQ 0
 ADD h, 4
 ADD p, 6
+	== if
 k DQ 8

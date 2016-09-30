@@ -115,12 +115,15 @@ Expression:
    	;
 If_statement:
 	IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
+		scopeOfFunction = insert_scope(scopeOfFunction, "if");
 		fprintf(file, "if\n");
 	}
 	| ELSE_IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
+		scopeOfFunction = insert_scope(scopeOfFunction, "elsif");
 		fprintf(file, "else if\n");
 	}
 	| ELSE{
+		scopeOfFunction = insert_scope(scopeOfFunction, "else");
 		fprintf(file, "else\n");
 	}
 	;
@@ -170,7 +173,7 @@ int main(void) {
 
 	symbol = create_list();
 	scopeOfFunction = create_stack();
-	scopeOfFunction = insert_scope(scopeOfFunction, "main");
+	scopeOfFunction = insert_scope(scopeOfFunction, "global");
 
 	file = fopen("compilado.txt", "r");
 

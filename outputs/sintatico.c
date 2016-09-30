@@ -466,8 +466,8 @@ static const yytype_uint8 yytranslate[] =
 static const yytype_uint8 yyrline[] =
 {
        0,    45,    45,    47,    50,    51,    54,    59,    71,    83,
-      94,    97,   100,   103,   106,   109,   112,   117,   120,   123,
-     128,   131,   134,   137,   140,   145,   147
+      94,    97,   100,   103,   106,   109,   112,   117,   121,   125,
+     131,   134,   137,   140,   143,   148,   150
 };
 #endif
 
@@ -1392,83 +1392,86 @@ yyreduce:
   case 17:
 #line 117 "flex-bison/CAss.y" /* yacc.c:1646  */
     {
+		scopeOfFunction = insert_scope(scopeOfFunction, "if");
 		fprintf(file, "if\n");
 	}
-#line 1398 "CAss.tab.c" /* yacc.c:1646  */
+#line 1399 "CAss.tab.c" /* yacc.c:1646  */
     break;
 
   case 18:
-#line 120 "flex-bison/CAss.y" /* yacc.c:1646  */
+#line 121 "flex-bison/CAss.y" /* yacc.c:1646  */
     {
+		scopeOfFunction = insert_scope(scopeOfFunction, "elsif");
 		fprintf(file, "else if\n");
 	}
-#line 1406 "CAss.tab.c" /* yacc.c:1646  */
+#line 1408 "CAss.tab.c" /* yacc.c:1646  */
     break;
 
   case 19:
-#line 123 "flex-bison/CAss.y" /* yacc.c:1646  */
+#line 125 "flex-bison/CAss.y" /* yacc.c:1646  */
     {
+		scopeOfFunction = insert_scope(scopeOfFunction, "else");
 		fprintf(file, "else\n");
 	}
-#line 1414 "CAss.tab.c" /* yacc.c:1646  */
+#line 1417 "CAss.tab.c" /* yacc.c:1646  */
     break;
 
   case 20:
-#line 128 "flex-bison/CAss.y" /* yacc.c:1646  */
+#line 131 "flex-bison/CAss.y" /* yacc.c:1646  */
     {
 		fprintf(file, "	== ");
 	}
-#line 1422 "CAss.tab.c" /* yacc.c:1646  */
+#line 1425 "CAss.tab.c" /* yacc.c:1646  */
     break;
 
   case 21:
-#line 131 "flex-bison/CAss.y" /* yacc.c:1646  */
+#line 134 "flex-bison/CAss.y" /* yacc.c:1646  */
     {
 		fprintf(file, "	< ");
 	}
-#line 1430 "CAss.tab.c" /* yacc.c:1646  */
+#line 1433 "CAss.tab.c" /* yacc.c:1646  */
     break;
 
   case 22:
-#line 134 "flex-bison/CAss.y" /* yacc.c:1646  */
+#line 137 "flex-bison/CAss.y" /* yacc.c:1646  */
     {
 		fprintf(file, " > ");
 	}
-#line 1438 "CAss.tab.c" /* yacc.c:1646  */
+#line 1441 "CAss.tab.c" /* yacc.c:1646  */
     break;
 
   case 23:
-#line 137 "flex-bison/CAss.y" /* yacc.c:1646  */
+#line 140 "flex-bison/CAss.y" /* yacc.c:1646  */
     {
 		fprintf(file, "	<= ");
 	}
-#line 1446 "CAss.tab.c" /* yacc.c:1646  */
+#line 1449 "CAss.tab.c" /* yacc.c:1646  */
     break;
 
   case 24:
-#line 140 "flex-bison/CAss.y" /* yacc.c:1646  */
+#line 143 "flex-bison/CAss.y" /* yacc.c:1646  */
     {
 		fprintf(file, " >= ");
 	}
-#line 1454 "CAss.tab.c" /* yacc.c:1646  */
+#line 1457 "CAss.tab.c" /* yacc.c:1646  */
     break;
 
   case 25:
-#line 145 "flex-bison/CAss.y" /* yacc.c:1646  */
+#line 148 "flex-bison/CAss.y" /* yacc.c:1646  */
     {
 	}
-#line 1461 "CAss.tab.c" /* yacc.c:1646  */
+#line 1464 "CAss.tab.c" /* yacc.c:1646  */
     break;
 
   case 26:
-#line 147 "flex-bison/CAss.y" /* yacc.c:1646  */
+#line 150 "flex-bison/CAss.y" /* yacc.c:1646  */
     {
 	}
-#line 1468 "CAss.tab.c" /* yacc.c:1646  */
+#line 1471 "CAss.tab.c" /* yacc.c:1646  */
     break;
 
 
-#line 1472 "CAss.tab.c" /* yacc.c:1646  */
+#line 1475 "CAss.tab.c" /* yacc.c:1646  */
       default: break;
     }
   /* User semantic actions sometimes alter yychar, and that requires
@@ -1696,7 +1699,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 150 "flex-bison/CAss.y" /* yacc.c:1906  */
+#line 153 "flex-bison/CAss.y" /* yacc.c:1906  */
 
 
 int yyerror(int typeError, char* variable) {
