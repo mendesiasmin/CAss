@@ -87,7 +87,7 @@ Expression:
 	}
    	;
 If_statement:
-	IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
+	IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS LEFT_KEY RIGHT_KEY{
 		fprintf(file, "if\n");
 	}
 	| ELSE_IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
