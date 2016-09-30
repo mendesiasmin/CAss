@@ -28,13 +28,14 @@
 %token INTEGER
 %token <stringValue> VARIABLE
 %token INT ASSIGN SEMICOLON END
-%token COMPARE BIGGER SMALLER BIGGER_THEN SMALLER_THEN
+%token COMPARE BIGGER SMALLER BIGGER_THEN SMALLER_THEN DIFFERENT NOT AND OR
 %token IF ELSE ELSE_IF
-%token PLUS MINUS TIMES DIVIDE LEFT_PARENTHESIS RIGHT_PARENTHESIS
+%token PLUS MINUS TIMES DIVIDE LEFT_PARENTHESIS RIGHT_PARENTHESIS LEFT_KEY RIGHT_KEY
+
 %left PLUS MINUS
 %left TIMES DIVIDE
 %left NEG
-%right LEFT_PARENTHESIS RIGHT_PARENTHESIS
+%right LEFT_PARENTHESIS RIGHT_PARENTHESIS LEFT_KEY RIGHT_KEY
 
 %type<intValue> Expression INTEGER
 
@@ -114,22 +115,26 @@ Expression:
 	}
    	;
 If_statement:
-	IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
+	IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS LEFT_KEY RIGHT_KEY{
 		scopeOfFunction = insert_scope(scopeOfFunction, "if");
 		fprintf(file, "if\n");
 	}
 	| ELSE_IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
-		scopeOfFunction = insert_scope(scopeOfFunction, "elsif");
 		fprintf(file, "else if\n");
 	}
 	| ELSE{
 		scopeOfFunction = insert_scope(scopeOfFunction, "else");
 		fprintf(file, "else\n");
 	}
-	;
+	| If_statement LEFT_KEY RIGHT_KEY{
+		fprintf(file, "{}\n");
+	}
 Conditional:
 	Operandor COMPARE Operandor{
 		fprintf(file, "	== ");
+	}
+	| Operandor DIFFERENT Operandor{
+		fprintf(file, "	!= ");
 	}
 	| Operandor SMALLER_THEN Operandor{
 		fprintf(file, "	< ");
@@ -143,7 +148,22 @@ Conditional:
 	| Operandor BIGGER Operandor{
 		fprintf(file, " >= ");
 	}
-	;
+	| Conditional AND Conditional{
+		fprintf(file, " AND ");
+	}
+	| Conditional OR Conditional{
+		fprintf(file, " OR	 ");
+	}
+	| NOT Operandor{
+		fprintf(file, " NOT ");
+	}
+	| NOT LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
+		fprintf(file, "NOT Conditional ");
+	}
+	| LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
+
+	}
+
 Operandor:
 	VARIABLE{
 	}

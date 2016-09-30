@@ -56,16 +56,22 @@ extern int yydebug;
     SMALLER = 266,
     BIGGER_THEN = 267,
     SMALLER_THEN = 268,
-    IF = 269,
-    ELSE = 270,
-    ELSE_IF = 271,
-    PLUS = 272,
-    MINUS = 273,
-    TIMES = 274,
-    DIVIDE = 275,
-    LEFT_PARENTHESIS = 276,
-    RIGHT_PARENTHESIS = 277,
-    NEG = 278
+    DIFFERENT = 269,
+    NOT = 270,
+    AND = 271,
+    OR = 272,
+    IF = 273,
+    ELSE = 274,
+    ELSE_IF = 275,
+    PLUS = 276,
+    MINUS = 277,
+    TIMES = 278,
+    DIVIDE = 279,
+    LEFT_PARENTHESIS = 280,
+    RIGHT_PARENTHESIS = 281,
+    LEFT_KEY = 282,
+    RIGHT_KEY = 283,
+    NEG = 284
   };
 #endif
 
@@ -79,7 +85,7 @@ union YYSTYPE
     int intValue;
     char *stringValue;
 
-#line 83 "CAss.tab.h" /* yacc.c:1909  */
+#line 89 "CAss.tab.h" /* yacc.c:1909  */
 };
 # define YYSTYPE_IS_TRIVIAL 1
 # define YYSTYPE_IS_DECLARED 1
