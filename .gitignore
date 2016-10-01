@@ -11,3 +11,4 @@ outputs/lexico.c
 outputs/sintatico.h
 outputs/sintatico.c
 CAss
+in.txt
