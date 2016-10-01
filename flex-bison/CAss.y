@@ -53,7 +53,7 @@ char* scopeGenerator() {
 
 %token INTEGER
 %token <stringValue> VARIABLE
-%token INT ASSIGN SEMICOLON END
+%token INT ASSIGN SEMICOLON END TAB
 %token COMPARE BIGGER SMALLER BIGGER_THEN SMALLER_THEN DIFFERENT NOT AND OR
 %token IF ELSE ELSE_IF
 %token PLUS MINUS TIMES DIVIDE LEFT_PARENTHESIS RIGHT_PARENTHESIS LEFT_KEY RIGHT_KEY
@@ -76,7 +76,6 @@ Input:
 Line:
 	END
 	| Assignment END {
-		//printf("Resultado: %d\n",$1);
 	}
 	| If_statement END {
 	}
@@ -89,6 +88,7 @@ Line:
 		scopeOfFunction = delete_scope(scopeOfFunction);
 	}
 	;
+
 Assignment:
 	INT VARIABLE SEMICOLON {
 		printf("Scopo dessa budega %s\n", scopeOfFunction->scope);
@@ -123,7 +123,6 @@ Assignment:
 			yyerror(2, $1);
 		}
 	}
-}
 ;
 
 Expression:
