@@ -5,3 +5,9 @@ source/symbol_table.c~
 .gitignore~
 compilado.txt~
 flex-bison/CAss.l~
+in
+compilado.txt
+outputs/lexico.c
+outputs/sintatico.h
+outputs/sintatico.c
+CAss
