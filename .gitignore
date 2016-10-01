@@ -13,3 +13,7 @@ outputs/sintatico.c
 CAss
 in.txt
 prog
+Makefile~
+in.txt~
+parser.c~
+source/stack.c~
