@@ -32,13 +32,13 @@ node* insert_symbol(node *list, char *symbol, char* scope) {
 			iterator_list = iterator_list->next;
 		}
 		iterator_list->next = new_node;
-		printf("Symbol was inserted with sucess\n");	
+		printf("Symbol was inserted with sucess\n");
 	}
 	return list;
 }
 
 void imprime(node *list) {
-	
+
 	node* listAux = list;
 	int i=0;
 
@@ -57,8 +57,7 @@ int find_symbol(node *list, char *symbol) {
 		}
 		iterator_list = iterator_list->next;
 	}
-	
-	
+
 	/* If this function arrived here the list don't have the symbol */
 	return FALSE;
 }

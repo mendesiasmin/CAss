@@ -1,3 +1,11 @@
+in
+compilado.txt
+outputs/lexico.c
+outputs/sintatico.h
+outputs/sintatico.c
+CAss
+in.txt
+prog
 flex-bison/CAss.y~
 header/symbol_table.h~
 in~

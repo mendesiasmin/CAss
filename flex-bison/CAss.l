@@ -35,6 +35,7 @@ variable ({word}|_)({word}|integer|_)*
 ")" return (RIGHT_PARENTHESIS);
 "{" return (LEFT_KEY);
 "}" return (RIGHT_KEY);
+
 {variable} {
 	yylval.stringValue = malloc(strlen(yytext));
 	strncpy(yylval.stringValue, yytext, strlen(yytext));

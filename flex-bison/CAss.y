@@ -46,10 +46,10 @@ char* scopeGenerator() {
 
 %union
 {
+		int bool;
     int intValue;
     char *stringValue;
 }
-
 
 %token INTEGER
 %token <stringValue> VARIABLE
@@ -123,7 +123,9 @@ Assignment:
 			yyerror(2, $1);
 		}
 	}
-	;
+}
+;
+
 Expression:
 	INTEGER {
 		$$ = $1;
@@ -217,7 +219,6 @@ int yyerror(int typeError, char* variable) {
 }
 
 int main(void) {
-
 
 	symbol = create_list();
 	scopeOfFunction = create_stack();
