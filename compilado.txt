@@ -1,4 +1,0 @@
-mov	DWORD PTR [rbp-4], 9
-mov	DWORD PTR [rbp-4], 4
-mov	DWORD PTR [rbp-8], 10
-mov	DWORD PTR [rbp-8], 8
