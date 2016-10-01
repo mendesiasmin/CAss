@@ -6,3 +6,10 @@ outputs/sintatico.c
 CAss
 in.txt
 prog
+flex-bison/CAss.y~
+header/symbol_table.h~
+in~
+source/symbol_table.c~
+.gitignore~
+compilado.txt~
+flex-bison/CAss.l~

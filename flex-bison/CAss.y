@@ -18,6 +18,7 @@
 
 %union
 {
+		int bool;
     int intValue;
     char *stringValue;
 }
@@ -71,13 +72,6 @@ INT VARIABLE SEMICOLON {
 		char* variable = (char*)malloc(sizeof(strlen($2)));
 		strcpy(variable, $2);
 		symbol = insert_symbol(symbol, variable, "main");
-	}
-}
-| VARIABLE ASSIGN Expression SEMICOLON {
-	if(find_symbol(symbol, $1, "main")) {
-		fprintf(file, "ADD %s, %d\n", $1, $3);
-	} else {
-		yyerror(2, $1);
 	}
 }
 ;
@@ -160,6 +154,7 @@ Expression:
 		| Expression{
 		}
 		;
+
 	%%
 
 int yyerror(int typeError, char* variable) {
@@ -180,8 +175,7 @@ int yyerror(int typeError, char* variable) {
 
 int main(void) {
 
-
-	symbol = create_list();
+	node *symbol = create_list();
 
 	file = fopen("compilado.txt", "r");
 
