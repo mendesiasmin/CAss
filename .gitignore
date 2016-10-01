@@ -11,4 +11,5 @@ source/symbol_table.c~
 .gitignore~
 compilado.txt~
 flex-bison/CAss.l~
-
+prog
+in.txt
