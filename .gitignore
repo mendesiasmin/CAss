@@ -1,6 +1,6 @@
 compilado.txt
 in
 outputs/lexico.c
-outputs/sintatica.h
-outputs/sintatica.c
+outputs/sintatico.h
+outputs/sintatico.c
 CAss
