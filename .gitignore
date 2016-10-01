@@ -5,9 +5,9 @@ source/symbol_table.c~
 .gitignore~
 compilado.txt~
 flex-bison/CAss.l~
-Makefile~
-header/stack.h~
-source/stack.c~
-in.txt~
-parser.c~
-prog
+in
+compilado.txt
+outputs/lexico.c
+outputs/sintatico.h
+outputs/sintatico.c
+CAs
