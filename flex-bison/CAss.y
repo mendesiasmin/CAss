@@ -142,8 +142,9 @@ Expression:
 		this_symbol = take_symbol(symbol, $1);
 		if(!this_symbol)
 			yyerror(2, $1);
-		else
+		else{
 			$$ = this_symbol->value;
+		}
 	}
 	| Expression PLUS Expression{
 		$$ = $1 + $3;
