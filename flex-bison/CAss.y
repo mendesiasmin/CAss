@@ -15,8 +15,11 @@
 	char *variable;
 	node *symbol;
 	node* this_symbol;
+	node* this_variable;
+	node* this_variable2;
 	stack *scopeOfFunction;
 	int word = 4;
+	int flag = true;
 
 %}
 
@@ -143,6 +146,14 @@ Expression:
 		if(!this_symbol)
 			yyerror(2, $1);
 		else{
+			if(flag){
+				this_variable = this_symbol;
+				flag = false;
+			}
+			else{
+				this_variable2 = this_symbol;
+				flag = true;
+			}
 			$$ = this_symbol->value;
 		}
 	}
@@ -178,6 +189,8 @@ If_statement:
 	}
 Conditional:
 	Expression COMPARE Expression{
+		printf("1. %s %d\n", this_variable->symbol, this_variable->value);
+		printf("2. %s %d\n", this_variable2->symbol, this_variable2->value);
 		fprintf(file, "	== ");
 	}
 	| Expression DIFFERENT Expression{
