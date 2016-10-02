@@ -14,6 +14,8 @@ variable ({word}|_)({word}|integer|_)*
 
 {white} { /*ignore*/ };
 "int" return (INT);
+"main" return (MAIN);
+"return" return (RETURN);
 "if" return (IF);
 "else" return (ELSE);
 "else if" return (ELSE_IF);

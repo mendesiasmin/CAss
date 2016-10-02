@@ -8,6 +8,10 @@ stack *create_stack() {
 	return NULL;
 }
 
+int is_empty_stcak(stack* list) {
+	return list == NULL;
+}
+
 stack *insert_scope(stack *list, char *scope) {
 
 	stack *new_stack = (stack*) malloc(sizeof(stack));
@@ -17,12 +21,12 @@ stack *insert_scope(stack *list, char *scope) {
 
 	strcpy(new_stack->scope, scope);
 
-	if(is_empty(list)) {
+	if(is_empty_stcak(list)) {
 		list = new_stack;
 	} else {
 		new_stack->next = list;
 		list = new_stack;
-		printf("Symbol was inserted with sucess\n");	
+		//printf("Symbol was inserted with sucess\n");
 	}
 	return list;
 }
@@ -35,7 +39,6 @@ stack *delete_scope(stack* list) {
 	return list;
 }
 char *take_scope(stack *list) {
-	printf("Qual o escopo dessa merda? %s\n", list->scope);
 	char* scope = (char*) malloc(sizeof(char)*strlen(list->scope));
 	strcpy(scope, list->scope);
 
@@ -51,4 +54,29 @@ int find_scope(stack *list, char* scope) {
 		iterator_list = iterator_list->next;
 	}
 	return FALSE;
+}
+
+char* scopeGenerator() {
+
+	char *validchars = "abcdefghijklmnopqrstuvwxiz";
+	char *novastr;
+	int str_len;
+
+	// tamanho da string
+	str_len = 10 + (rand() % 10);
+
+	// aloca memoria
+	novastr = (char*)malloc((str_len + 1)* sizeof(char));
+
+	int i;
+
+	for ( i = 0; i < str_len; i++ ) {
+		novastr[i] = validchars[ rand() % strlen(validchars) ];
+		//novastr[i + 1] = 0x0;
+	}
+
+	novastr[i] = '\0';
+	//printf("string gerada %s\n", novastr);
+
+	return novastr;
 }
