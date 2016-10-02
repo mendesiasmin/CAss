@@ -94,10 +94,8 @@ Line:
 		symbol = insert_symbol(symbol, variable, scopeOfFunction->scope);
 	}
 	| RETURN INTEGER SEMICOLON{
-		if(scopeOfFunction->next == NULL)
+		if(scopeOfFunction->next == NULL ||  !find_symbol(symbol, "main"))
 			yyerror(3,"");
-		else if(strcmp(scopeOfFunction->next->scope, "global") || !find_symbol(symbol, "main"))
-				yyerror(3, "");
 	}
 	;
 Assignment:
