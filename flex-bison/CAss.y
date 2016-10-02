@@ -16,8 +16,6 @@
 
 	node *symbol;
 	stack *scopeOfFunction;
-	stack *scopeMain = NULL;
-	int flag_main;
 
 char* scopeGenerator() {
 
@@ -82,6 +80,8 @@ Line:
 	| Assignment END {
 		//printf("Resultado: %d\n",$1);
 		//imprime(symbol);
+		if(is_empty_stcak(scopeOfFunction))
+			yyerror(4, "Escopo nao definido\0");
 	}
 	| If_statement END {
 	}
@@ -98,8 +98,8 @@ Line:
 	}
 	| RETURN INTEGER SEMICOLON{
 
-		if(strcmp(scopeOfFunction->next->scope, "global"))
-				yyerror(0, "Retorn fora do escopo");
+		if(strcmp(scopeOfFunction->next->scope, "global") || !find_symbol(symbol, "main"))
+				yyerror(0, "Retorn fora do escopo\0");
 	}
 	;
 Assignment:
