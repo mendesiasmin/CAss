@@ -76,6 +76,9 @@ Line:
 		char* variable = (char*)malloc(sizeof(char)*5);
 		strcpy(variable, "main");
 		symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _FUNCTION, 0);
+		fprintf(file, "main:\n");
+		fprintf(file, "push		rbp\n");
+		fprintf(file, "mov		rbp, rsp\n");
 	}
 	| RETURN INTEGER SEMICOLON{
 		if(scopeOfFunction->next == NULL ||  !find_symbol(symbol, "main"))
@@ -84,7 +87,12 @@ Line:
 			char* variable = (char*)malloc(sizeof(char)*7);
 			strcpy(variable, "return");
 			symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _FUNCTION, $2);
+			fprintf(file, "mov		eax, %d\n", $2);
+			fprintf(file, "pop		rbp\n");
+			fprintf(file, "ret\n");
+
 		}
+
 	}
 	;
 
