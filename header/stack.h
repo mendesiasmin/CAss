@@ -25,3 +25,5 @@ char* take_scope(stack *list);
 stack* delete_scope(stack* list);
 
 int find_scope(stack* list, char* scope);
+
+char* scopeGenerator();

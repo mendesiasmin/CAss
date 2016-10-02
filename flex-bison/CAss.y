@@ -17,31 +17,6 @@
 	node *symbol;
 	stack *scopeOfFunction;
 
-char* scopeGenerator() {
-
-	char *validchars = "abcdefghijklmnopqrstuvwxiz";
-	char *novastr;
-	int str_len;
-
-	// tamanho da string
-	str_len = 10 + (rand() % 10);
-
-	// aloca memoria
-	novastr = (char*)malloc((str_len + 1)* sizeof(char));
-
-	int i;
-
-	for ( i = 0; i < str_len; i++ ) {
-		novastr[i] = validchars[ rand() % strlen(validchars) ];
-		//novastr[i + 1] = 0x0;
-	}
-
-	novastr[i] = '\0';
-	//printf("string gerada %s\n", novastr);
-
-	return novastr;
-}
-
 %}
 
 %union
