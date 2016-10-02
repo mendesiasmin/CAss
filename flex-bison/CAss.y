@@ -127,7 +127,7 @@ Assignment:
 		this_symbol = take_symbol(symbol, $1);
 		if(this_symbol) {
 			this_symbol->value = $3;
-			//fprintf(file ,"mov DWORD PTR [rbp-%d], %d\n", this_symbol->word, this_symbol->value);
+			fprintf(file ,"mov DWORD PTR [rbp-%d], %d\n", this_symbol->word, this_symbol->value);
 		} else {
 			yyerror(2, $1);
 		}
@@ -144,11 +144,9 @@ Expression:
 			yyerror(4, $1);
 		else{
 			$$ = this_symbol->value;
-			fprintf(file, "mov eax, DDWORD PTR [rbp-%d]\n", this_symbol->word);
 		}
 	}
 	| Expression PLUS Expression{
-		fprintf(file, "add eax, %d\n", $3);
 		$$ = $1 + $3;
 	}
 	| Expression MINUS Expression{
