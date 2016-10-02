@@ -61,7 +61,16 @@ Line:
 		scopeOfFunction = insert_scope(scopeOfFunction, scopeGenerator());
 	}
 	| RIGHT_KEY {
-		scopeOfFunction = delete_scope(scopeOfFunction);
+
+		if(!strcmp(scopeOfFunction->next->scope, "global")){
+			if(find_symbol(symbol, "return"))
+				scopeOfFunction = delete_scope(scopeOfFunction);
+			else
+				yyerror(4, "return\0");
+		}
+		else{
+			scopeOfFunction = delete_scope(scopeOfFunction);
+		}
 	}
 	| INT MAIN LEFT_PARENTHESIS RIGHT_PARENTHESIS{
 		char* variable = (char*)malloc(sizeof(char)*5);
@@ -71,6 +80,11 @@ Line:
 	| RETURN INTEGER SEMICOLON{
 		if(scopeOfFunction->next == NULL ||  !find_symbol(symbol, "main"))
 			yyerror(3,"");
+		else{
+			char* variable = (char*)malloc(sizeof(char)*7);
+			strcpy(variable, "return");
+			symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _FUNCTION, 0);
+		}
 	}
 	;
 
