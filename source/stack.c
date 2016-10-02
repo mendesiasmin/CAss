@@ -26,7 +26,7 @@ stack *insert_scope(stack *list, char *scope) {
 	} else {
 		new_stack->next = list;
 		list = new_stack;
-		printf("Symbol was inserted with sucess\n");
+		//printf("Symbol was inserted with sucess\n");
 	}
 	return list;
 }
@@ -39,7 +39,6 @@ stack *delete_scope(stack* list) {
 	return list;
 }
 char *take_scope(stack *list) {
-	printf("Qual o escopo dessa merda? %s\n", list->scope);
 	char* scope = (char*) malloc(sizeof(char)*strlen(list->scope));
 	strcpy(scope, list->scope);
 

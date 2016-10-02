@@ -37,7 +37,7 @@ char* scopeGenerator() {
 	}
 
 	novastr[i] = '\0';
-	printf("string gerada %s\n", novastr);
+	//printf("string gerada %s\n", novastr);
 
 	return novastr;
 }
@@ -78,7 +78,6 @@ Input:
 Line:
 	END
 	| Assignment END {
-		//printf("Resultado: %d\n",$1);
 		//imprime(symbol);
 	}
 	| If_statement END {
@@ -99,8 +98,6 @@ Line:
 			yyerror(3,"");
 		else if(strcmp(scopeOfFunction->next->scope, "global") || !find_symbol(symbol, "main"))
 				yyerror(3, "");
-
-		printf("teste\n");
 	}
 	;
 Assignment:
