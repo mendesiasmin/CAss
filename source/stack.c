@@ -8,6 +8,10 @@ stack *create_stack() {
 	return NULL;
 }
 
+int is_empty_stcak(stack* list) {
+	return list == NULL;
+}
+
 stack *insert_scope(stack *list, char *scope) {
 
 	stack *new_stack = (stack*) malloc(sizeof(stack));
@@ -17,12 +21,12 @@ stack *insert_scope(stack *list, char *scope) {
 
 	strcpy(new_stack->scope, scope);
 
-	if(is_empty(list)) {
+	if(is_empty_stcak(list)) {
 		list = new_stack;
 	} else {
 		new_stack->next = list;
 		list = new_stack;
-		printf("Symbol was inserted with sucess\n");	
+		printf("Symbol was inserted with sucess\n");
 	}
 	return list;
 }
