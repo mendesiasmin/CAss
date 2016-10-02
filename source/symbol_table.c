@@ -32,7 +32,7 @@ node* insert_symbol(node *list, char *symbol, char* scope, int type, int value) 
 			iterator_list = iterator_list->next;
 		}
 		iterator_list->next = new_node;
-		printf("Symbol was inserted with sucess\n");
+		//printf("Symbol was inserted with sucess\n");
 	}
 	return list;
 }
