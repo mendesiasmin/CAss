@@ -106,39 +106,18 @@ Assignment:
 			yyerror(2, $1);
 		}
 	}
-	| INT VARIABLE ASSIGN VARIABLE SEMICOLON {
-		if(find_symbol(symbol, $2) /*&& find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $2))*/) {
-			yyerror(1, $2);
-		} else if (!find_symbol(symbol, $4) /*|| !find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $4))*/){
-			yyerror(4, $4);
-		}
-		else{
-			this_symbol = take_symbol(symbol, $4);
-			char* variable = (char*)malloc(sizeof(strlen($2)));
-			strcpy(variable, $2);
-			symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _INTEGER, this_symbol->value);
-			fprintf(file ,"%s DQ %d\n", $2, this_symbol->value);
-		}
-	}
-	| VARIABLE ASSIGN VARIABLE SEMICOLON {
-		if(!find_symbol(symbol, $1)) {
-			yyerror(4, $1);
-		} else if (!find_symbol(symbol, $3)){
-			yyerror(4, $3);
-		}
-		else{
-			this_symbol = take_symbol(symbol, $3);
-			char* variable = (char*)malloc(sizeof(strlen($1)));
-			strcpy(variable, $1);
-			symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _INTEGER, this_symbol->value);
-			fprintf(file ,"%s DQ %d\n", $1, this_symbol->value);
-		}
-	}
 ;
 
 Expression:
 	INTEGER {
 		$$ = $1;
+	}
+	| VARIABLE{
+		this_symbol = take_symbol(symbol, $1);
+		if(!this_symbol)
+			yyerror(4, $1);
+		else
+			$$ = this_symbol->value;
 	}
 	| Expression PLUS Expression{
 		$$ = $1 + $3;
@@ -158,7 +137,8 @@ Expression:
 	| LEFT_PARENTHESIS Expression RIGHT_PARENTHESIS {
 		$$ = $2;
 	}
-   	;
+  ;
+
 If_statement:
 	IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS {
 		fprintf(file, "if\n");
@@ -205,9 +185,7 @@ Conditional:
 	}
 
 Operandor:
-	VARIABLE{
-	}
-	| Expression{
+	Expression{
 	}
 	;
 %%
