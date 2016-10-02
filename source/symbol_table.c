@@ -12,7 +12,7 @@ int is_empty(node *list) {
 	return list == NULL;
 }
 
-node* insert_symbol(node *list, char *symbol, char* scope, int type, int value) {
+node* insert_symbol(node *list, char *symbol, char* scope, int type, int word, int value) {
 
 	node *new_node = (node*) malloc(sizeof(node));
 
@@ -21,6 +21,7 @@ node* insert_symbol(node *list, char *symbol, char* scope, int type, int value) 
 	new_node->symbol = symbol;
 	new_node->scope = scope;
 	new_node->type = type;
+	new_node->word = word;
 	new_node->value = value;
 
 	if(is_empty(list)) {
@@ -43,7 +44,7 @@ void imprime(node *list) {
 	int i=0;
 
 	while(listAux != NULL) {
-		printf("Impress: %d %s %s %d %d\n", i++, listAux->symbol, listAux->scope, listAux->type, listAux->value);
+		printf("Impress: %d %s %s %d %d %d\n", i++, listAux->symbol, listAux->scope, listAux->type, listAux->word, listAux->value);
 		listAux = listAux->next;
 	}
 }
