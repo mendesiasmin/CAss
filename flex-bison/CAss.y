@@ -15,6 +15,7 @@
 #define false 0
 
 	node *symbol;
+	node* this_symbol;
 	stack *scopeOfFunction;
 
 %}
@@ -60,16 +61,30 @@ Line:
 		scopeOfFunction = insert_scope(scopeOfFunction, scopeGenerator());
 	}
 	| RIGHT_KEY {
-		scopeOfFunction = delete_scope(scopeOfFunction);
+
+		if(!strcmp(scopeOfFunction->next->scope, "global")){
+			if(find_symbol(symbol, "return"))
+				scopeOfFunction = delete_scope(scopeOfFunction);
+			else
+				yyerror(4, "return\0");
+		}
+		else{
+			scopeOfFunction = delete_scope(scopeOfFunction);
+		}
 	}
 	| INT MAIN LEFT_PARENTHESIS RIGHT_PARENTHESIS{
 		char* variable = (char*)malloc(sizeof(char)*5);
 		strcpy(variable, "main");
-		symbol = insert_symbol(symbol, variable, scopeOfFunction->scope);
+		symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _FUNCTION, 0);
 	}
 	| RETURN INTEGER SEMICOLON{
 		if(scopeOfFunction->next == NULL ||  !find_symbol(symbol, "main"))
 			yyerror(3,"");
+		else{
+			char* variable = (char*)malloc(sizeof(char)*7);
+			strcpy(variable, "return");
+			symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _FUNCTION, 0);
+		}
 	}
 	;
 
@@ -81,7 +96,7 @@ Assignment:
 			fprintf(file ,"%s DQ 0\n", $2);
 			char* variable = (char*)malloc(sizeof(strlen($2)));
 			strcpy(variable, $2);
-			symbol = insert_symbol(symbol, variable, scopeOfFunction->scope);
+			symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _INTEGER, 0);
 		}
 	}
 	| INT VARIABLE ASSIGN Expression SEMICOLON {
@@ -92,12 +107,14 @@ Assignment:
 			fprintf(file, "%s DQ %d\n", $2, $4);
 			char* variable = (char*)malloc(sizeof(strlen($2)));
 			strcpy(variable, $2);
-			symbol = insert_symbol(symbol, variable, scopeOfFunction->scope);
+			symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _INTEGER, $4);
 		}
 	}
 	| VARIABLE ASSIGN Expression SEMICOLON {
 
-		if(find_symbol(symbol, $1) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $1))) {
+		this_symbol = take_symbol(symbol, $1);
+		if(this_symbol) {
+			this_symbol->value = $3;
 			fprintf(file, "ADD %s, %d\n", $1, $3);
 		} else {
 			yyerror(2, $1);
@@ -108,6 +125,13 @@ Assignment:
 Expression:
 	INTEGER {
 		$$ = $1;
+	}
+	| VARIABLE{
+		this_symbol = take_symbol(symbol, $1);
+		if(!this_symbol)
+			yyerror(4, $1);
+		else
+			$$ = this_symbol->value;
 	}
 	| Expression PLUS Expression{
 		$$ = $1 + $3;
@@ -127,7 +151,8 @@ Expression:
 	| LEFT_PARENTHESIS Expression RIGHT_PARENTHESIS {
 		$$ = $2;
 	}
-   	;
+  ;
+
 If_statement:
 	IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS {
 		fprintf(file, "if\n");
@@ -174,9 +199,7 @@ Conditional:
 	}
 
 Operandor:
-	VARIABLE{
-	}
-	| Expression{
+	Expression{
 	}
 	;
 %%
@@ -194,6 +217,9 @@ int yyerror(int typeError, char* variable) {
 			break;
 		case 3:
 			printf("Fora de escopo\n");
+			break;
+		case 4:
+			printf("Variavel %s nao foi declarada\n", variable);
 			break;
 		//default:
 			//nothing to do
