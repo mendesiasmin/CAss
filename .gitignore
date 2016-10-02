@@ -1,10 +1,3 @@
-flex-bison/CAss.y~
-header/symbol_table.h~
-in~
-source/symbol_table.c~
-.gitignore~
-compilado.txt~
-flex-bison/CAss.l~
 in
 compilado.txt
 outputs/lexico.c
@@ -13,3 +6,14 @@ outputs/sintatico.c
 CAss
 in.txt
 prog
+flex-bison/CAss.y~
+flex-bison/CAss.l~
+header/symbol_table.h~
+source/symbol_table.c~
+in~
+.gitignore~
+compilado.txt~
+Makefile~
+in.txt~
+parser.c~
+source/stack.c~

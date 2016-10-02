@@ -1,12 +1,14 @@
 CAss: flex-bison/CAss.l flex-bison/CAss.y
+	gcc -o prog parser.c
+	./prog < in.txt
 	bison -d flex-bison/CAss.y
 	mv CAss.tab.h outputs/sintatico.h
 	mv CAss.tab.c outputs/sintatico.c
 	flex flex-bison/CAss.l
 	mv lex.yy.c outputs/lexico.c
-	gcc -o CAss outputs/sintatico.c outputs/lexico.c source/symbol_table.c -I ./header/ -g
+	gcc -o CAss outputs/sintatico.c outputs/lexico.c source/symbol_table.c source/stack.c -I ./header/ -g
 
 clean:
 	rm outputs/lexico.* outputs/sintatico.* CAss
 run: 
-	./CAss < in
+	./CAss < in.txt
