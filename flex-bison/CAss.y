@@ -83,7 +83,7 @@ Line:
 		else{
 			char* variable = (char*)malloc(sizeof(char)*7);
 			strcpy(variable, "return");
-			symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _FUNCTION, 0);
+			symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _FUNCTION, $2);
 		}
 	}
 	;
