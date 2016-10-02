@@ -7,16 +7,16 @@
 #include "symbol_table.h"
 #include "stack.h"
 
-	extern FILE *yyin;
-	FILE *file;
-	char *variable;
-
 #define true 1
 #define false 0
 
+	extern FILE *yyin;
+	FILE *file;
+	char *variable;
 	node *symbol;
 	node* this_symbol;
 	stack *scopeOfFunction;
+	int word = 4;
 
 %}
 
@@ -61,16 +61,38 @@ Line:
 		scopeOfFunction = insert_scope(scopeOfFunction, scopeGenerator());
 	}
 	| RIGHT_KEY {
-		scopeOfFunction = delete_scope(scopeOfFunction);
+
+		if(!strcmp(scopeOfFunction->next->scope, "global")){
+			if(find_symbol(symbol, "return"))
+				scopeOfFunction = delete_scope(scopeOfFunction);
+			else
+				yyerror(4, "return\0");
+		}
+		else{
+			scopeOfFunction = delete_scope(scopeOfFunction);
+		}
 	}
 	| INT MAIN LEFT_PARENTHESIS RIGHT_PARENTHESIS{
 		char* variable = (char*)malloc(sizeof(char)*5);
 		strcpy(variable, "main");
-		symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _FUNCTION, 0);
+		symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _FUNCTION, 0, 0);
+		fprintf(file, "main:\n");
+		fprintf(file, "push	rbp\n");
+		fprintf(file, "mov		rbp, rsp\n\n");
 	}
 	| RETURN INTEGER SEMICOLON{
 		if(scopeOfFunction->next == NULL ||  !find_symbol(symbol, "main"))
 			yyerror(3,"");
+		else{
+			char* variable = (char*)malloc(sizeof(char)*7);
+			strcpy(variable, "return");
+			symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _FUNCTION, 0, $2);
+			fprintf(file, "\nmov		eax, %d\n", $2);
+			fprintf(file, "pop		rbp\n");
+			fprintf(file, "ret\n");
+
+		}
+
 	}
 	;
 
@@ -79,10 +101,12 @@ Assignment:
 		if(find_symbol(symbol, $2) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $2))) {
 			yyerror(1, $2);
 		} else {
-			fprintf(file ,"%s DQ 0\n", $2);
 			char* variable = (char*)malloc(sizeof(strlen($2)));
 			strcpy(variable, $2);
-			symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _INTEGER, 0);
+			symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _INTEGER, word, 0);
+			word += 4;
+			this_symbol = take_symbol(symbol, variable);
+			fprintf(file ,"mov DWORD PTR [rbp-%d], %d\n", this_symbol->word, this_symbol->value);
 		}
 	}
 	| INT VARIABLE ASSIGN Expression SEMICOLON {
@@ -90,10 +114,12 @@ Assignment:
 		if(find_symbol(symbol, $2) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $2))) {
 			yyerror(1, $2);
 		} else {
-			fprintf(file, "%s DQ %d\n", $2, $4);
 			char* variable = (char*)malloc(sizeof(strlen($2)));
 			strcpy(variable, $2);
-			symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _INTEGER, $4);
+			symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _INTEGER, word, $4);
+			word += 4;
+			this_symbol = take_symbol(symbol, variable);
+			fprintf(file ,"mov DWORD PTR [rbp-%d], %d\n", this_symbol->word, this_symbol->value);
 		}
 	}
 	| VARIABLE ASSIGN Expression SEMICOLON {
@@ -101,12 +127,12 @@ Assignment:
 		this_symbol = take_symbol(symbol, $1);
 		if(this_symbol) {
 			this_symbol->value = $3;
-			fprintf(file, "ADD %s, %d\n", $1, $3);
+			fprintf(file ,"mov DWORD PTR [rbp-%d], %d\n", this_symbol->word, this_symbol->value);
 		} else {
 			yyerror(2, $1);
 		}
 	}
-;
+	;
 
 Expression:
 	INTEGER {
