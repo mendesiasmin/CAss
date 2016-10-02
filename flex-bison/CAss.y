@@ -66,7 +66,7 @@ Line:
 			if(find_symbol(symbol, "return"))
 				scopeOfFunction = delete_scope(scopeOfFunction);
 			else
-				yyerror(4, "return\0");
+				yyerror(2, "return\0");
 		}
 		else{
 			scopeOfFunction = delete_scope(scopeOfFunction);
@@ -129,7 +129,7 @@ Expression:
 	| VARIABLE{
 		this_symbol = take_symbol(symbol, $1);
 		if(!this_symbol)
-			yyerror(4, $1);
+			yyerror(2, $1);
 		else
 			$$ = this_symbol->value;
 	}
@@ -213,9 +213,6 @@ int yyerror(int typeError, char* variable) {
 			break;
 		case 3:
 			printf("Fora de escopo\n");
-			break;
-		case 4:
-			printf("Variavel %s nao foi declarada\n", variable);
 			break;
 		//default:
 			//nothing to do
