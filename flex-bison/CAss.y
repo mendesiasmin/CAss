@@ -80,8 +80,6 @@ Line:
 	| Assignment END {
 		//printf("Resultado: %d\n",$1);
 		//imprime(symbol);
-		if(is_empty_stcak(scopeOfFunction))
-			yyerror(4, "Escopo nao definido\0");
 	}
 	| If_statement END {
 	}
@@ -97,9 +95,12 @@ Line:
 		symbol = insert_symbol(symbol, variable, scopeOfFunction->scope);
 	}
 	| RETURN INTEGER SEMICOLON{
+		if(scopeOfFunction->next == NULL)
+			yyerror(3,"");
+		else if(strcmp(scopeOfFunction->next->scope, "global") || !find_symbol(symbol, "main"))
+				yyerror(3, "");
 
-		if(strcmp(scopeOfFunction->next->scope, "global") || !find_symbol(symbol, "main"))
-				yyerror(0, "Retorn fora do escopo\0");
+		printf("teste\n");
 	}
 	;
 Assignment:
@@ -219,6 +220,10 @@ int yyerror(int typeError, char* variable) {
 			break;
 		case 2:
 			printf("Variavel %s nao foi declarada\n", variable);
+			break;
+		case 3:
+			printf("Fora de escopo\n");
+			break;
 		//default:
 			//nothing to do
 	}
