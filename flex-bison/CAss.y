@@ -179,22 +179,22 @@ If_statement:
 		fprintf(file, "else\n");
 	}
 Conditional:
-	Operandor COMPARE Operandor{
+	Expression COMPARE Expression{
 		fprintf(file, "	== ");
 	}
-	| Operandor DIFFERENT Operandor{
+	| Expression DIFFERENT Expression{
 		fprintf(file, "	!= ");
 	}
-	| Operandor SMALLER_THEN Operandor{
+	| Expression SMALLER_THEN Expression{
 		fprintf(file, "	< ");
 	}
-	| Operandor BIGGER_THEN Operandor{
+	| Expression BIGGER_THEN Expression{
 		fprintf(file, " > ");
 	}
-	| Operandor SMALLER Operandor{
+	| Expression SMALLER Expression{
 		fprintf(file, "	<= ");
 	}
-	| Operandor BIGGER Operandor{
+	| Expression BIGGER Expression{
 		fprintf(file, " >= ");
 	}
 	| Conditional AND Conditional{
@@ -203,7 +203,7 @@ Conditional:
 	| Conditional OR Conditional{
 		fprintf(file, " OR	 ");
 	}
-	| NOT Operandor{
+	| NOT Expression{
 		fprintf(file, " NOT ");
 	}
 	| NOT LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
@@ -213,10 +213,6 @@ Conditional:
 
 	}
 
-Operandor:
-	Expression{
-	}
-	;
 %%
 
 int yyerror(int typeError, char* variable) {
