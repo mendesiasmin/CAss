@@ -3,25 +3,26 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 #include "symbol_table.h"
 #include "stack.h"
 
 	extern FILE *yyin;
 	FILE *file;
 	char *variable;
-	int numberScope = 0;
 
 #define true 1
 #define false 0
 
 	node *symbol;
 	stack *scopeOfFunction;
+	stack *scopeMain = NULL;
+	int flag_main;
 
 char* scopeGenerator() {
 
 	char *validchars = "abcdefghijklmnopqrstuvwxiz";
 	char *novastr;
-
 	int str_len;
 
 	// tamanho da string
@@ -29,15 +30,16 @@ char* scopeGenerator() {
 
 	// aloca memoria
 	novastr = (char*)malloc((str_len + 1)* sizeof(char));
-	
+
 	int i;
 
 	for ( i = 0; i < str_len; i++ ) {
 		novastr[i] = validchars[ rand() % strlen(validchars) ];
-		novastr[i + 1] = 0x0;
+		//novastr[i + 1] = 0x0;
 	}
 
-	printf("string gerada %s \n", novastr);
+	novastr[i] = '\0';
+	printf("string gerada %s\n", novastr);
 
 	return novastr;
 }
@@ -51,6 +53,7 @@ char* scopeGenerator() {
 }
 
 
+%token MAIN RETURN
 %token INTEGER
 %token <stringValue> VARIABLE
 %token INT ASSIGN SEMICOLON END
@@ -71,28 +74,36 @@ char* scopeGenerator() {
 
 Input:
 	/*    */
-	| Input Line
+	| Input Line{
+	}
 	;
 Line:
 	END
 	| Assignment END {
 		//printf("Resultado: %d\n",$1);
+		//imprime(symbol);
 	}
 	| If_statement END {
 	}
 	| LEFT_KEY {
 		scopeOfFunction = insert_scope(scopeOfFunction, scopeGenerator());
-		printf("Scopo disso tudo adicionado %s\n", scopeOfFunction->scope);
 	}
 	| RIGHT_KEY {
-		printf("Scopo disso tudo deletado %s\n", scopeOfFunction->scope);
 		scopeOfFunction = delete_scope(scopeOfFunction);
+	}
+	| INT MAIN LEFT_PARENTHESIS RIGHT_PARENTHESIS{
+		char* variable = (char*)malloc(sizeof(char)*5);
+		strcpy(variable, "main");
+		symbol = insert_symbol(symbol, variable, scopeOfFunction->scope);
+	}
+	| RETURN INTEGER SEMICOLON{
+
+		if(strcmp(scopeOfFunction->next->scope, "global"))
+				yyerror(0, "Retorn fora do escopo");
 	}
 	;
 Assignment:
 	INT VARIABLE SEMICOLON {
-		printf("Scopo dessa budega %s\n", scopeOfFunction->scope);
-
 		if(find_symbol(symbol, $2) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $2))) {
 			yyerror(1, $2);
 		} else {
@@ -103,7 +114,6 @@ Assignment:
 		}
 	}
 	| INT VARIABLE ASSIGN Expression SEMICOLON {
-		printf("Scopo dessa budega %s\n", scopeOfFunction->scope);
 
 		if(find_symbol(symbol, $2) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $2))) {
 			yyerror(1, $2);
@@ -115,7 +125,6 @@ Assignment:
 		}
 	}
 	| VARIABLE ASSIGN Expression SEMICOLON {
-		printf("Scopo dessa budega %s\n", scopeOfFunction->scope);
 
 		if(find_symbol(symbol, $1) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $1))) {
 			fprintf(file, "ADD %s, %d\n", $1, $3);
