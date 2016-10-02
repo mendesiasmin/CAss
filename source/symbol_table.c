@@ -17,11 +17,9 @@ node* insert_symbol(node *list, char *symbol, char* scope) {
 	node *new_node = (node*) malloc(sizeof(node));
 
 	new_node->next = NULL;
-	new_node->symbol = (char*)malloc(sizeof(strlen(symbol)));
-	new_node->scope = (char*)malloc(sizeof(strlen(scope)));
 
-	strcpy(new_node->symbol, symbol);
-	strcpy(new_node->scope, scope);
+	new_node->symbol = symbol;
+	new_node->scope, scope;
 
 	if(is_empty(list)) {
 		list = new_node;
