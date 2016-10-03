@@ -21,6 +21,7 @@
 	stack *scopeOfFunction;
 	int word = 4;
 	int flag = true;
+	int l = 2;
 
 %}
 
@@ -63,24 +64,25 @@ Line:
 	}
 	| LEFT_KEY {
 		scopeOfFunction = insert_scope(scopeOfFunction, scopeGenerator());
-		fprintf(file, " push\trbp\nmov\trbp, rsp\n");
 	}
 	| RIGHT_KEY {
 		if(!strcmp(scopeOfFunction->next->scope, "global")){
 			if(find_symbol(symbol, "return")){
 				scopeOfFunction = delete_scope(scopeOfFunction);
-				fprintf(file, "pop\trbp\nret\n");
 			}
 			else
 				yyerror(2, "return\0");
 		}
+		else if(take_last_if(symbol) != NULL){
+			this_symbol = take_last_if(symbol);
+			fprintf(file, ".L%d:\n\n", this_symbol->word);
+			scopeOfFunction = delete_scope(scopeOfFunction);
+		}
 		else{
 			scopeOfFunction = delete_scope(scopeOfFunction);
-			fprintf(file, "pop\trbp\nret\n");
 		}
 	}
 	| INT MAIN LEFT_PARENTHESIS RIGHT_PARENTHESIS{
-		fprintf(file, "main:\n");
 		char* variable = (char*)malloc(sizeof(char)*5);
 		strcpy(variable, "main");
 		symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _FUNCTION, 0, 0);
@@ -92,7 +94,6 @@ Line:
 		if(scopeOfFunction->next == NULL ||  !find_symbol(symbol, "main"))
 			yyerror(3,"");
 		else{
-			fprintf(file, "mov\teax, %d", INTEGER);
 			char* variable = (char*)malloc(sizeof(char)*7);
 			strcpy(variable, "return");
 			symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _FUNCTION, 0, $2);
@@ -129,7 +130,6 @@ Assignment:
 		}
 	}
 	| VARIABLE ASSIGN Expression SEMICOLON {
-
 		this_symbol = take_symbol(symbol, $1);
 		if(this_symbol) {
 			this_symbol->value = $3;
@@ -181,70 +181,151 @@ Expression:
   ;
 
 If_statement:
-	IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS {
-		
+	IF Conditional LEFT_KEY{
+		scopeOfFunction = insert_scope(scopeOfFunction, scopeGenerator());
+		this_symbol = take_last_if(symbol);
+		l++;
 	}
-	| ELSE_IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
-		
+	| RIGHT_KEY ELSE LEFT_KEY{
+		this_symbol = take_last_if(symbol);
+		fprintf(file, ".L%d:\n\n", this_symbol->word);
+		symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _IF, l, 0);
+		l++;
 	}
-	| ELSE {
-		
+	| RIGHT_KEY ELSE_IF Conditional LEFT_KEY{
+		this_symbol = take_last_if(symbol);
+		fprintf(file, ".L%d:\n\n", l-1);
+
 	}
+	;
+
 Conditional:
 	Expression COMPARE Expression{
-		printf("1. %s %d\n", this_variable->symbol, this_variable->value);
-		printf("2. %s %d\n", this_variable2->symbol, this_variable2->value);
-		fprintf(file, "	== ");
-		if(isalpha($1))
-			fprintf(file, "cmp\tDWORD PTR [rbp-4], %d\njne\t.L2\n", $3);
-		else if(isalpha($3))
-			fprintf(file, "cmp\tDWORD PTR [rbp-4], %d\njne\t.L2\n", $1);
+		variable = (char*)malloc(sizeof(char)*13);
+		strcpy(variable, "If_statement");
+		symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _IF, l, 0);
+		this_symbol = take_last_if(symbol);
+		if(this_variable != NULL && this_variable2 != NULL)
+			fprintf(file, "\ncmp\tDWORD PTR [rbp-%d], DWORD PTR [rbp-%d]\n", this_variable->word, this_variable2->word);
+		else if(this_variable != NULL){
+			fprintf(file, "\ncmp\tDWORD PTR [rbp-%d], %d\n", this_variable->word, $3);
+		}
+		else{
+			fprintf(file, "\ncmp %d, %d\n", $1, $3);
+		}
+		fprintf(file, "jne\t.L%d\n", this_symbol->word);
+		this_variable = NULL;
+		this_variable2 = NULL;
+		flag = true;
 	}
 	| Expression DIFFERENT Expression{
-		if(isalpha($1))
-			fprintf(file, "cmp\tDWORD PTR [rbp-4], %d\nje\t.L2\n", $3);
-		else if(isalpha($3))
-			fprintf(file, "cmp\tDWORD PTR [rbp-4], %d\nje\t.L2\n", $1);
+		variable = (char*)malloc(sizeof(char)*15);
+		strcpy(variable, "If_statement\0");
+		symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _IF, l, 0);
+		this_symbol = take_last_if(symbol);
+
+		if(this_variable != NULL && this_variable2 != NULL)
+			fprintf(file, "\ncmp\tDWORD PTR [rbp-%d], DWORD PTR [rbp-%d]\n", this_variable->word, this_variable2->word);
+		else if(this_variable != NULL){
+			fprintf(file, "\ncmp\tDWORD PTR [rbp-%d], %d\n", this_variable->word, $3);
+		}
+		else{
+			fprintf(file, "\ncmp %d, %d\n", $1, $3);
+		}
+		fprintf(file, "je\t.L%d\n", this_symbol->word);
+		this_variable = NULL;
+		this_variable2 = NULL;
+		flag = true;
 	}
 	| Expression SMALLER_THEN Expression{
-		if(isalpha($1))
-			fprintf(file, "cmp\tDWORD PTR [rbp-4], %d\njg\t.L2\n", $3);
-		else if(isalpha($3))
-			fprintf(file, "cmp\tDWORD PTR [rbp-4], %d\njg\t.L2\n", $1);
+		variable = (char*)malloc(sizeof(char)*15);
+		strcpy(variable, "If_statement\0");
+		symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _IF, l, 0);
+		this_symbol = take_last_if(symbol);
+
+		if(this_variable != NULL && this_variable2 != NULL)
+			fprintf(file, "\ncmp\tDWORD PTR [rbp-%d], DWORD PTR [rbp-%d]\n", this_variable->word, this_variable2->word);
+		else if(this_variable != NULL){
+			fprintf(file, "\ncmp\tDWORD PTR [rbp-%d], %d\n", this_variable->word, $3);
+		}
+		else{
+			fprintf(file, "\ncmp %d, %d\n", $1, $3);
+		}
+		fprintf(file, "jg\t.L%d\n", this_symbol->word);
+		this_variable = NULL;
+		this_variable2 = NULL;
+		flag = true;
 	}
 	| Expression BIGGER_THEN Expression{
-		if(isalpha($1))
-			fprintf(file, "cmp\tDWORD PTR [rbp-4], %d\njle\t.L2\n", $3);
-		else if(isalpha($3))
-			fprintf(file, "cmp\tDWORD PTR [rbp-4], %d\njle\t.L2\n", $1);
+		variable = (char*)malloc(sizeof(char)*15);
+		strcpy(variable, "If_statement\0");
+		symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _IF, l, 0);
+		this_symbol = take_last_if(symbol);
+
+		if(this_variable != NULL && this_variable2 != NULL)
+			fprintf(file, "\ncmp\tDWORD PTR [rbp-%d], DWORD PTR [rbp-%d]\n", this_variable->word, this_variable2->word);
+		else if(this_variable != NULL){
+			fprintf(file, "\ncmp\tDWORD PTR [rbp-%d], %d\n", this_variable->word, $3);
+		}
+		else{
+			fprintf(file, "\ncmp %d, %d\n", $1, $3);
+		}
+		fprintf(file, "jle\t.L%d\n", this_symbol->word);
+		this_variable = NULL;
+		this_variable2 = NULL;
+		flag = true;
 	}
 	| Expression SMALLER Expression{
-		if(isalpha($1))
-			fprintf(file, "cmp\tDWORD PTR [rbp-4], %d\njg\t.L2\n", $3);
-		else if(isalpha($3))
-			fprintf(file, "cmp\tDWORD PTR [rbp-4], %d\njg\t.L2\n", $1);
+		variable = (char*)malloc(sizeof(char)*15);
+		strcpy(variable, "If_statement\0");
+		symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _IF, l, 0);
+		this_symbol = take_last_if(symbol);
+
+		if(this_variable != NULL && this_variable2 != NULL)
+			fprintf(file, "\ncmp\tDWORD PTR [rbp-%d], DWORD PTR [rbp-%d]\n", this_variable->word, this_variable2->word);
+		else if(this_variable != NULL){
+			fprintf(file, "\ncmp\tDWORD PTR [rbp-%d], %d\n", this_variable->word, $3);
+		}
+		else{
+			fprintf(file, "\ncmp %d, %d\n", $1, $3);
+		}
+		fprintf(file, "jg\t.L%d\n", this_symbol->word);
+		this_variable = NULL;
+		this_variable2 = NULL;
+		flag = true;
 	}
 	| Expression BIGGER Expression{
-		if(isalpha($1))
-			fprintf(file, "cmp\tDWORD PTR [rbp-4], %d\njle\t.L2\n", $3);
-		else if(isalpha($3))
-			fprintf(file, "cmp\tDWORD PTR [rbp-4], %d\njle\t.L2\n", $1);
+		variable = (char*)malloc(sizeof(char)*15);
+		strcpy(variable, "If_statement\0");
+		symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _IF, l, 0);
+		this_symbol = take_last_if(symbol);
+
+		if(this_variable != NULL && this_variable2 != NULL)
+			fprintf(file, "\ncmp\tDWORD PTR [rbp-%d], DWORD PTR [rbp-%d]\n", this_variable->word, this_variable2->word);
+		else if(this_variable != NULL){
+			fprintf(file, "\ncmp\tDWORD PTR [rbp-%d], %d\n", this_variable->word, $3);
+		}
+		else{
+			fprintf(file, "\ncmp %d, %d\n", $1, $3);
+		}
+		fprintf(file, "jle\t.L%d\n", this_symbol->word);
+		this_variable = NULL;
+		this_variable2 = NULL;
+		flag = true;
 	}
 	| Conditional AND Conditional{
-		
+
 	}
 	| Conditional OR Conditional{
-		
+
 	}
-	| NOT Expression{
-		
-	}
-	| NOT LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
-		
+	| NOT Conditional {
+
 	}
 	| LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
 
 	}
+	;
 
 %%
 
@@ -286,4 +367,12 @@ int main(void) {
 	yyparse();
 
 	fclose(file);
+
+	free(file);
+	free(variable);
+	free(symbol);
+	free(this_symbol);
+	free(this_variable);
+	free(this_variable2);
+	free(scopeOfFunction);
 }

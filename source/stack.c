@@ -17,9 +17,7 @@ stack *insert_scope(stack *list, char *scope) {
 	stack *new_stack = (stack*) malloc(sizeof(stack));
 
 	new_stack->next = NULL;
-	new_stack->scope = (char*)malloc(sizeof(strlen(scope)));
-
-	strcpy(new_stack->scope, scope);
+	new_stack->scope = scope;
 
 	if(is_empty_stcak(list)) {
 		list = new_stack;
@@ -61,14 +59,13 @@ char* scopeGenerator() {
 	char *validchars = "abcdefghijklmnopqrstuvwxiz";
 	char *novastr;
 	int str_len;
+	int i;
 
 	// tamanho da string
 	str_len = 10 + (rand() % 10);
 
 	// aloca memoria
 	novastr = (char*)malloc((str_len + 1)* sizeof(char));
-
-	int i;
 
 	for ( i = 0; i < str_len; i++ ) {
 		novastr[i] = validchars[ rand() % strlen(validchars) ];

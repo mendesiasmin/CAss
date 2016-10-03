@@ -12,7 +12,6 @@ variable ({word}|_)({word}|integer|_)*
 
 %%
 
-{white} { /*ignore*/ };
 "int" return (INT);
 "main" return (MAIN);
 "return" return (RETURN);
@@ -37,6 +36,7 @@ variable ({word}|_)({word}|integer|_)*
 ")" return (RIGHT_PARENTHESIS);
 "{" return (LEFT_KEY);
 "}" return (RIGHT_KEY);
+{white} { /*ignore*/ };
 
 {variable} {
 	yylval.stringValue = malloc(strlen(yytext));
