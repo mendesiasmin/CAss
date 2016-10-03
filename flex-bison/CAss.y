@@ -144,7 +144,6 @@ Expression:
 			yyerror(2, $1);
 		else
 			$$ = this_symbol->value;
-		}
 	}
 	| Expression PLUS Expression{
 		$$ = $1 + $3;
