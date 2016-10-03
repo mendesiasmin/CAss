@@ -4,6 +4,7 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
+#include <ctype.h>
 #include "symbol_table.h"
 #include "stack.h"
 
@@ -25,14 +26,16 @@
 
 %union
 {
-		int bool;
+	char *stringValue;
     int intValue;
-    char *stringValue;
+    int bool;
 }
 
+%type <intValue> Expression INTEGER
+%type <stringValue> VARIABLE
+
 %token MAIN RETURN
-%token INTEGER
-%token <stringValue> VARIABLE
+%token INTEGER  VARIABLE
 %token INT ASSIGN SEMICOLON END TAB
 %token COMPARE BIGGER SMALLER BIGGER_THEN SMALLER_THEN DIFFERENT NOT AND OR
 %token IF ELSE ELSE_IF
@@ -42,8 +45,6 @@
 %left TIMES DIVIDE
 %left NEG
 %right LEFT_PARENTHESIS RIGHT_PARENTHESIS LEFT_KEY RIGHT_KEY
-
-%type<intValue> Expression INTEGER
 
 %start Input
 
@@ -62,20 +63,24 @@ Line:
 	}
 	| LEFT_KEY {
 		scopeOfFunction = insert_scope(scopeOfFunction, scopeGenerator());
+		fprintf(file, " push\trbp\nmov\trbp, rsp\n");
 	}
 	| RIGHT_KEY {
-
 		if(!strcmp(scopeOfFunction->next->scope, "global")){
-			if(find_symbol(symbol, "return"))
+			if(find_symbol(symbol, "return")){
 				scopeOfFunction = delete_scope(scopeOfFunction);
+				fprintf(file, "pop\trbp\nret\n");
+			}
 			else
 				yyerror(2, "return\0");
 		}
 		else{
 			scopeOfFunction = delete_scope(scopeOfFunction);
+			fprintf(file, "pop\trbp\nret\n");
 		}
 	}
 	| INT MAIN LEFT_PARENTHESIS RIGHT_PARENTHESIS{
+		fprintf(file, "main:\n");
 		char* variable = (char*)malloc(sizeof(char)*5);
 		strcpy(variable, "main");
 		symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _FUNCTION, 0, 0);
@@ -87,18 +92,16 @@ Line:
 		if(scopeOfFunction->next == NULL ||  !find_symbol(symbol, "main"))
 			yyerror(3,"");
 		else{
+			fprintf(file, "mov\teax, %d", INTEGER);
 			char* variable = (char*)malloc(sizeof(char)*7);
 			strcpy(variable, "return");
 			symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _FUNCTION, 0, $2);
 			fprintf(file, "\nmov		eax, %d\n", $2);
 			fprintf(file, "pop		rbp\n");
 			fprintf(file, "ret\n");
-
 		}
-
 	}
 	;
-
 Assignment:
 	INT VARIABLE SEMICOLON {
 		if(find_symbol(symbol, $2) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $2))) {
@@ -179,46 +182,65 @@ Expression:
 
 If_statement:
 	IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS {
-		fprintf(file, "if\n");
+		
 	}
 	| ELSE_IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
-		fprintf(file, "else if\n");
+		
 	}
 	| ELSE {
-		fprintf(file, "else\n");
+		
 	}
 Conditional:
 	Expression COMPARE Expression{
 		printf("1. %s %d\n", this_variable->symbol, this_variable->value);
 		printf("2. %s %d\n", this_variable2->symbol, this_variable2->value);
 		fprintf(file, "	== ");
+		if(isalpha($1))
+			fprintf(file, "cmp\tDWORD PTR [rbp-4], %d\njne\t.L2\n", $3);
+		else if(isalpha($3))
+			fprintf(file, "cmp\tDWORD PTR [rbp-4], %d\njne\t.L2\n", $1);
 	}
 	| Expression DIFFERENT Expression{
-		fprintf(file, "	!= ");
+		if(isalpha($1))
+			fprintf(file, "cmp\tDWORD PTR [rbp-4], %d\nje\t.L2\n", $3);
+		else if(isalpha($3))
+			fprintf(file, "cmp\tDWORD PTR [rbp-4], %d\nje\t.L2\n", $1);
 	}
 	| Expression SMALLER_THEN Expression{
-		fprintf(file, "	< ");
+		if(isalpha($1))
+			fprintf(file, "cmp\tDWORD PTR [rbp-4], %d\njg\t.L2\n", $3);
+		else if(isalpha($3))
+			fprintf(file, "cmp\tDWORD PTR [rbp-4], %d\njg\t.L2\n", $1);
 	}
 	| Expression BIGGER_THEN Expression{
-		fprintf(file, " > ");
+		if(isalpha($1))
+			fprintf(file, "cmp\tDWORD PTR [rbp-4], %d\njle\t.L2\n", $3);
+		else if(isalpha($3))
+			fprintf(file, "cmp\tDWORD PTR [rbp-4], %d\njle\t.L2\n", $1);
 	}
 	| Expression SMALLER Expression{
-		fprintf(file, "	<= ");
+		if(isalpha($1))
+			fprintf(file, "cmp\tDWORD PTR [rbp-4], %d\njg\t.L2\n", $3);
+		else if(isalpha($3))
+			fprintf(file, "cmp\tDWORD PTR [rbp-4], %d\njg\t.L2\n", $1);
 	}
 	| Expression BIGGER Expression{
-		fprintf(file, " >= ");
+		if(isalpha($1))
+			fprintf(file, "cmp\tDWORD PTR [rbp-4], %d\njle\t.L2\n", $3);
+		else if(isalpha($3))
+			fprintf(file, "cmp\tDWORD PTR [rbp-4], %d\njle\t.L2\n", $1);
 	}
 	| Conditional AND Conditional{
-		fprintf(file, " AND ");
+		
 	}
 	| Conditional OR Conditional{
-		fprintf(file, " OR	 ");
+		
 	}
 	| NOT Expression{
-		fprintf(file, " NOT ");
+		
 	}
 	| NOT LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
-		fprintf(file, "NOT Conditional ");
+		
 	}
 	| LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
 
