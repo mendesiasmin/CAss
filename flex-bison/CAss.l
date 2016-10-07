@@ -1,6 +1,8 @@
 %{
 #include "sintatico.h"
 #include <stdlib.h>
+#include "symbol_table.h"
+#include "stack.h"
 %}
 
 white [ \t]+
@@ -48,7 +50,7 @@ variable ({word}|_)({word}|integer|_)*
 	return (INTEGER);
 }
 ";" return (SEMICOLON);
-"\n" return(END);
+"\n" { /*ignore*/ };
 "\t" return(TAB);
 
 %%

@@ -4,9 +4,12 @@
 #include <string.h>
 #include <math.h>
 
+//Types
 #define _FUNCTION 0
 #define _INTEGER 1
 #define _IF 2
+#define _VARIABLE 3
+#define _EXPRESSION 4
 
 #endif
 typedef struct Node node;
@@ -18,8 +21,12 @@ struct Node {
 	int type;
 	int word;
 	int value;
+	int conditional;
 	node *next;
+	node *previous;
 };
+
+node *symbol;
 
 /* Creating list */
 node *create_list();
@@ -33,3 +40,5 @@ void imprime(node *list);
 char* take_scope_of_symbol(node *list, char *symbol);
 node* take_symbol(node *list, char *symbol);
 node* take_last_if(node *list);
+node* take_last_symbol(node *list);
+node* delete_symbol(node *list, node *delete);
