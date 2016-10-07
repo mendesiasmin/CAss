@@ -1,6 +1,8 @@
 %{
 #include "sintatico.h"
 #include <stdlib.h>
+#include "symbol_table.h"
+#include "stack.h"
 %}
 
 white [ \t]+
