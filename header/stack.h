@@ -12,6 +12,8 @@ struct Stack {
 	stack *next;
 };
 
+stack *scopeOfFunction;
+
 /* Creating stack */
 stack *create_stack();
 
