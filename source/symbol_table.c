@@ -32,6 +32,7 @@ node* insert_symbol(node *list, char *symbol, char* scope, int type, int word, i
 		while(iterator_list->next != NULL) {
 			iterator_list = iterator_list->next;
 		}
+		new_node->previous = iterator_list;
 		iterator_list->next = new_node;
 		//printf("Symbol was inserted with sucess\n");
 	}
@@ -47,6 +48,21 @@ void imprime(node *list) {
 		printf("Impress: %d %s %s %d %d %d\n", i++, listAux->symbol, listAux->scope, listAux->type, listAux->word, listAux->value);
 		listAux = listAux->next;
 	}
+}
+
+node* delete_symbol(node *list, node *delete){
+		if(delete == list){
+			delete->next->previous = NULL;
+			list = delete->next;
+		}
+		else{
+			delete->previous->next = delete->next;
+			if(delete->next != NULL) delete->next->previous = delete->previous;
+		}
+		delete->next = NULL;
+		delete->previous = NULL;
+		free(delete);
+		return list;
 }
 
 int find_symbol(node *list, char *symbol) {
@@ -99,4 +115,13 @@ node* take_last_if(node *list) {
 		iterator_list = iterator_list->next;
 	}
 	return if_pointer;
+}
+
+node* take_last_symbol(node *list){
+	node *iterator_list = list;
+
+	while(iterator_list->next != NULL) {
+		iterator_list = iterator_list->next;
+	}
+	return iterator_list;
 }
