@@ -1,6 +1,4 @@
 CAss: flex-bison/CAss.l flex-bison/CAss.y
-	#gcc -o prog parser.c
-	#./prog < in.txt
 	bison -d flex-bison/CAss.y
 	mv CAss.tab.h outputs/sintatico.h
 	mv CAss.tab.c outputs/sintatico.c
