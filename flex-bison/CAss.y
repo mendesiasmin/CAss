@@ -22,6 +22,7 @@
 	int word = 4;
 	int flag = true;
 	int l = 2;
+	int actual_label = 0;
 
 %}
 
@@ -39,7 +40,7 @@
 %token INTEGER  VARIABLE
 %token INT ASSIGN SEMICOLON END TAB
 %token COMPARE BIGGER SMALLER BIGGER_THEN SMALLER_THEN DIFFERENT NOT AND OR
-%token IF ELSE ELSE_IF
+%token IF ELSE ELSE_IF FOR
 %token PLUS MINUS TIMES DIVIDE LEFT_PARENTHESIS RIGHT_PARENTHESIS LEFT_KEY RIGHT_KEY
 
 %left PLUS MINUS
@@ -62,6 +63,8 @@ Line:
 	}
 	| If_statement END {
 	}
+	| For_statement END {
+	}
 	| LEFT_KEY {
 		scopeOfFunction = insert_scope(scopeOfFunction, scopeGenerator());
 	}
@@ -75,7 +78,7 @@ Line:
 		}
 		else if(take_last_if(symbol) != NULL){
 			this_symbol = take_last_if(symbol);
-			fprintf(file, ".L%d:\n\n", this_symbol->word);
+			fprintf(file, ".L%d:\n", this_symbol->word);
 			scopeOfFunction = delete_scope(scopeOfFunction);
 		}
 		else{
@@ -130,10 +133,20 @@ Assignment:
 		}
 	}
 	| VARIABLE ASSIGN Expression SEMICOLON {
+		printf("Aqui\n");
 		this_symbol = take_symbol(symbol, $1);
 		if(this_symbol) {
 			this_symbol->value = $3;
 			fprintf(file ,"mov DWORD PTR [rbp-%d], %d\n", this_symbol->word, this_symbol->value);
+		} else {
+			yyerror(2, $1);
+		}
+	}
+	| VARIABLE PLUS PLUS {
+		this_symbol = take_symbol(symbol, $1);
+		if(this_symbol) {
+			this_symbol->value = this_symbol->value + 1;
+			fprintf(file ,"add DWORD PTR [rbp-%d], 1\n", this_symbol->word);
 		} else {
 			yyerror(2, $1);
 		}
@@ -181,14 +194,14 @@ Expression:
   ;
 
 If_statement:
-	IF Conditional LEFT_KEY{
+	IF LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS LEFT_KEY {
 		scopeOfFunction = insert_scope(scopeOfFunction, scopeGenerator());
 		this_symbol = take_last_if(symbol);
 		l++;
 	}
 	| RIGHT_KEY ELSE LEFT_KEY{
 		this_symbol = take_last_if(symbol);
-		fprintf(file, ".L%d:\n\n", this_symbol->word);
+		fprintf(file, ".L%d:\n\n", l);
 		symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _IF, l, 0);
 		l++;
 	}
@@ -199,6 +212,17 @@ If_statement:
 	}
 	;
 
+For_statement:
+	FOR LEFT_PARENTHESIS Assignment {
+	  actual_label = l++;
+		fprintf(file, "\n.L%d:", actual_label);
+	}
+	Conditional SEMICOLON Assignment RIGHT_PARENTHESIS LEFT_KEY {
+		scopeOfFunction = insert_scope(scopeOfFunction, scopeGenerator());
+		this_symbol = take_last_if(symbol);
+		l++;
+		fprintf(file, "jump\t.L%d\n\n", actual_label);
+	}
 Conditional:
 	Expression COMPARE Expression{
 		variable = (char*)malloc(sizeof(char)*13);

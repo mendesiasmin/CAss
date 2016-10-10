@@ -7,7 +7,6 @@
 #define _FUNCTION 0
 #define _INTEGER 1
 #define _IF 2
-
 #endif
 typedef struct Node node;
 
