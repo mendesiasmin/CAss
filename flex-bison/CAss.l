@@ -15,6 +15,7 @@ variable ({word}|_)({word}|integer|_)*
 "int" return (INT);
 "main" return (MAIN);
 "return" return (RETURN);
+"for" return (FOR);
 "if" return (IF);
 "else" return (ELSE);
 "else if" return (ELSE_IF);
