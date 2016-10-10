@@ -261,15 +261,14 @@ Conditional:
 		flag = true;
 	}
 	| Expression SMALLER_THEN Expression{
-		variable = (char*)malloc(sizeof(char)*15);
-		strcpy(variable, "If_statement\0");
+		variable = (char*)malloc(sizeof(char)*13);
+		strcpy(variable, "If_statement");
 		symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _IF, l, 0);
 		this_symbol = take_last_if(symbol);
-
 		if(this_variable != NULL && this_variable2 != NULL)
 			fprintf(file, "\ncmp\tDWORD PTR [rbp-%d], DWORD PTR [rbp-%d]\n", this_variable->word, this_variable2->word);
 		else if(this_variable != NULL){
-			f(file, "\ncmp\tDWORD PTR [rbp-%d], %d\n", this_variable->word, $3);
+			fprintf(file, "\ncmp\tDWORD PTR [rbp-%d], %d\n", this_variable->word, $3);
 		}
 		else{
 			fprintf(file, "\ncmp %d, %d\n", $1, $3);
@@ -303,7 +302,6 @@ Conditional:
 		strcpy(variable, "If_statement\0");
 		symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _IF, l, 0);
 		this_symbol = take_last_if(symbol);
-
 		if(this_variable != NULL && this_variable2 != NULL)
 			fprintf(file, "\ncmp\tDWORD PTR [rbp-%d], DWORD PTR [rbp-%d]\n", this_variable->word, this_variable2->word);
 		else if(this_variable != NULL){
