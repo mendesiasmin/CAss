@@ -24,7 +24,7 @@
 	int flag_if = 0;
 	int flag_if_position = 0;
 	int l = 2;
-	int i = 0;
+	int actual_label = 0;
 
 %}
 
@@ -42,7 +42,7 @@
 %token INTEGER  VARIABLE
 %token INT ASSIGN SEMICOLON END TAB
 %token COMPARE BIGGER SMALLER BIGGER_THEN SMALLER_THEN DIFFERENT NOT AND OR
-%token IF ELSE ELSE_IF
+%token IF ELSE ELSE_IF FOR
 %token PLUS MINUS TIMES DIVIDE LEFT_PARENTHESIS RIGHT_PARENTHESIS LEFT_KEY RIGHT_KEY
 
 %left PLUS MINUS
@@ -63,6 +63,8 @@ Line:
  	Assignment SEMICOLON {
 	}
 	| If_statement {
+	}
+	| For_statement END {
 	}
 	| LEFT_KEY {
 		scopeOfFunction = insert_scope(scopeOfFunction, scopeGenerator());
@@ -138,6 +140,15 @@ Assignment:
 		if(this_symbol) {
 			this_symbol->value = $3;
 			fprintf(file ,"mov DWORD PTR [rbp-%d], %d\n", this_symbol->word, this_symbol->value);
+		} else {
+			yyerror(2, $1);
+		}
+	}
+	| VARIABLE PLUS PLUS {
+		this_symbol = take_symbol(symbol, $1);
+		if(this_symbol) {
+			this_symbol->value = this_symbol->value + 1;
+			fprintf(file ,"add DWORD PTR [rbp-%d], 1\n", this_symbol->word);
 		} else {
 			yyerror(2, $1);
 		}
@@ -291,6 +302,18 @@ If_statement:
 	}
 	;
 
+For_statement:
+	FOR LEFT_PARENTHESIS Assignment {
+	  actual_label = l++;
+		fprintf(file, "\n.L%d:", actual_label);
+	}
+	Conditional SEMICOLON Assignment RIGHT_PARENTHESIS LEFT_KEY {
+		scopeOfFunction = insert_scope(scopeOfFunction, scopeGenerator());
+		this_symbol = take_last_if(symbol);
+		l++;
+		fprintf(file, "jump\t.L%d\n\n", actual_label);
+	}
+	
 Conditional:
 	Expression COMPARE Expression{
 		compare[0] = (char*)malloc(sizeof(char)*20);
