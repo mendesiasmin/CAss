@@ -39,6 +39,6 @@ int find_symbol(node *list, char *symbol);
 void imprime(node *list);
 char* take_scope_of_symbol(node *list, char *symbol);
 node* take_symbol(node *list, char *symbol);
-node* take_last_if(node *list);
+node* take_last(node *list, int type);
 node* take_last_symbol(node *list);
 node* delete_symbol(node *list, node *delete);

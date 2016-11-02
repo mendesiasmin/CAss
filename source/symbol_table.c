@@ -103,18 +103,18 @@ node* take_symbol(node *list, char *symbol) {
 	return NULL;
 }
 
-node* take_last_if(node *list) {
+node* take_last(node *list, int type) {
 
 	node *iterator_list = list;
-	node *if_pointer = NULL;
+	node *pointer = NULL;
 
 	while(iterator_list != NULL) {
-		if(iterator_list->type == _IF) {
-			if_pointer = iterator_list;
+		if(iterator_list->type == type) {
+			pointer = iterator_list;
 		}
 		iterator_list = iterator_list->next;
 	}
-	return if_pointer;
+	return pointer;
 }
 
 node* take_last_symbol(node *list){
