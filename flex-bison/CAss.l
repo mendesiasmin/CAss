@@ -20,6 +20,10 @@ variable ({word}|_)({word}|integer|_)*
 "if" return (IF);
 "else" return (ELSE);
 "else if" return (ELSE_IF);
+"switch" return (SWITCH);
+"case" return (CASE);
+":" return (COLON);
+"break" return (BREAK);
 "==" return (COMPARE);
 "!=" return (DIFFERENT);
 "<=" return (SMALLER);
