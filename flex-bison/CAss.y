@@ -32,8 +32,8 @@
 %union
 {
 	char *stringValue;
-    int intValue;
-    int bool;
+  int intValue;
+  int bool;
 }
 
 %type <intValue> Expression INTEGER
@@ -155,11 +155,41 @@ Assignment:
 			fprintf(file ,"mov DWORD PTR [rbp-%d], %d\n", this_symbol->word, this_symbol->value);
 		}
 	}
+
+	| INT VARIABLE ASSIGN VARIABLE {
+		if(find_symbol(symbol, $2) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $2))) {
+			yyerror(1, $2);
+		} else {
+			char* variable = (char*)malloc(sizeof(strlen($2)));
+			strcpy(variable, $2);
+			this_variable2 = take_symbol(symbol, $4);
+			if(this_variable2) {
+				symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _INTEGER, word, this_variable2->value);
+				word += 4;
+				fprintf(file ,"mov DWORD PTR [rbp-%d], DWORD PTR [rbp-%d]\n", this_symbol->word, this_variable2->word);
+			}
+		}
+	}
 	| VARIABLE ASSIGN Expression {
 		this_symbol = take_symbol(symbol, $1);
 		if(this_symbol) {
 			this_symbol->value = $3;
 			fprintf(file ,"mov DWORD PTR [rbp-%d], %d\n", this_symbol->word, this_symbol->value);
+		} else {
+			yyerror(2, $1);
+		}
+	}
+	| VARIABLE ASSIGN VARIABLE {
+		this_variable = take_symbol(symbol, $1);
+		this_variable2 = take_symbol(symbol, $3);
+		if(this_variable) {
+			if(this_variable2) {
+				this_symbol->value = $3;
+				fprintf(file ,"mov DWORD PTR [rbp-%d], DWORD PTR [rbp-%d]\n", this_variable->word, this_variable2->word);
+			}
+			else {
+				yyerror(2, $3);
+			}
 		} else {
 			yyerror(2, $1);
 		}
