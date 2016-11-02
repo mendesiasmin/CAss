@@ -70,6 +70,8 @@ Line:
 	}
 	| Switch_statement {
 	}
+	| While_statement {
+	}
 	| LEFT_KEY {
 		scopeOfFunction = insert_scope(scopeOfFunction, scopeGenerator());
 	}
@@ -93,6 +95,12 @@ Line:
 			fprintf(file, ".L%d:\n", l);
 			symbol = delete_symbol(symbol, this_symbol);
 			scopeOfFunction = delete_scope(scopeOfFunction);
+		}
+		else if(take_last(symbol, _WHILE)){
+			this_symbol = take_last(symbol, _WHILE);
+			fprintf(file, "jmp .L%d\n", this_symbol->word);
+			fprintf(file, ".L%d:\n", this_symbol->word-1);
+
 		}
 		else{
 			scopeOfFunction = delete_scope(scopeOfFunction);
@@ -319,7 +327,7 @@ For_statement:
 	  actual_label = l++;
 		fprintf(file, "\n.L%d:", actual_label);
 	}
-	| Conditional SEMICOLON Assignment RIGHT_PARENTHESIS LEFT_KEY {
+	Conditional SEMICOLON Assignment RIGHT_PARENTHESIS LEFT_KEY {
 		scopeOfFunction = insert_scope(scopeOfFunction, scopeGenerator());
 		this_symbol = take_last(symbol, _IF);
 		l++;
@@ -327,6 +335,33 @@ For_statement:
 	}
 	;
 
+While_statement:
+	DO LEFT_KEY {
+	}
+	Input RIGHT_KEY WHILE Conditional SEMICOLON {
+		printf("do-while\n");
+	}
+	| WHILE Conditional {
+		symbol = insert_symbol(symbol, "", scopeOfFunction->scope, _WHILE, ++l, 0);
+		fprintf(file, "\n.L%d:\n", l);
+		switch (*compare[3]) {
+			case '0':
+				fprintf(file, "cmp\t%s, %s\n", compare[0], compare[1]);
+				break;
+			case '1':
+				fprintf(file, "cmp\tDWORD PTR [rbp-%s], %s\n", compare[0], compare[1]);
+				break;
+			case '2':
+				fprintf(file, "cmp\t%s, DWORD PTR [rbp-%s]\n", compare[0], compare[1]);
+				break;
+			case '3':
+				fprintf(file, "mov eax, DWORD PTR [rbp-%s]\n", compare[0]);
+				fprintf(file, "cmp\teax, DWORD PTR [rbp-%s]\n", compare[1]);
+				break;
+		}
+		fprintf(file, "%s\t.L%d\n", compare[2], l-1);
+	}
+	;
 Switch_statement:
 	SWITCH LEFT_PARENTHESIS Expression RIGHT_PARENTHESIS {
 		symbol = insert_symbol(symbol, "", scopeOfFunction->scope, _SWITCH, l, 0);
@@ -547,6 +582,9 @@ int yyerror(int typeError, char* variable) {
 			break;
 		case 3:
 			printf("Fora de escopo\n");
+			break;
+		case 4:
+			printf("Condicao invalida no laco do/while\n");
 			break;
 		//default:
 			//nothing to do
