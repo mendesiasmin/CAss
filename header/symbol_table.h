@@ -9,7 +9,7 @@
 #define _INTEGER 1
 #define _IF 2
 #define _VARIABLE 3
-#define _EXPRESSION 4
+#define _SWITCH 4
 
 #endif
 typedef struct Node node;
@@ -39,6 +39,6 @@ int find_symbol(node *list, char *symbol);
 void imprime(node *list);
 char* take_scope_of_symbol(node *list, char *symbol);
 node* take_symbol(node *list, char *symbol);
-node* take_last_if(node *list);
+node* take_last(node *list, int type);
 node* take_last_symbol(node *list);
 node* delete_symbol(node *list, node *delete);
