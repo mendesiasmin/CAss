@@ -44,7 +44,7 @@
 %token INT ASSIGN SEMICOLON END TAB
 %token COMPARE BIGGER SMALLER BIGGER_THEN SMALLER_THEN DIFFERENT NOT AND OR
 %token IF ELSE ELSE_IF SWITCH BREAK CASE COLON DEFAULT
-%token FOR
+%token FOR WHILE DO
 %token PLUS MINUS TIMES DIVIDE LEFT_PARENTHESIS RIGHT_PARENTHESIS LEFT_KEY RIGHT_KEY
 
 %left PLUS MINUS
@@ -319,12 +319,13 @@ For_statement:
 	  actual_label = l++;
 		fprintf(file, "\n.L%d:", actual_label);
 	}
-	Conditional SEMICOLON Assignment RIGHT_PARENTHESIS LEFT_KEY {
+	| Conditional SEMICOLON Assignment RIGHT_PARENTHESIS LEFT_KEY {
 		scopeOfFunction = insert_scope(scopeOfFunction, scopeGenerator());
 		this_symbol = take_last(symbol, _IF);
 		l++;
 		fprintf(file, "jump\t.L%d\n\n", actual_label);
 	}
+	;
 
 Switch_statement:
 	SWITCH LEFT_PARENTHESIS Expression RIGHT_PARENTHESIS {

@@ -26,6 +26,8 @@ variable ({word}|_)({word}|integer|_)*
 "default" return (DEFAULT);
 ":" return (COLON);
 "break" return (BREAK);
+"while" return (WHILE);
+"do" return (DO);
 "==" return (COMPARE);
 "!=" return (DIFFERENT);
 "<=" return (SMALLER);
