@@ -10,6 +10,7 @@
 #define _IF 2
 #define _VARIABLE 3
 #define _SWITCH 4
+#define _WHILE 5
 
 #endif
 typedef struct Node node;
