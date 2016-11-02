@@ -9,7 +9,7 @@
 #define _INTEGER 1
 #define _IF 2
 #define _VARIABLE 3
-#define _EXPRESSION 4
+#define _SWITCH 4
 
 #endif
 typedef struct Node node;
