@@ -22,6 +22,7 @@ variable ({word}|_)({word}|integer|_)*
 "else if" return (ELSE_IF);
 "switch" return (SWITCH);
 "case" return (CASE);
+"default" return (DEFAULT);
 ":" return (COLON);
 "break" return (BREAK);
 "==" return (COMPARE);

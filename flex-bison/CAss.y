@@ -23,6 +23,7 @@
 	int word = 4;
 	int flag_if = 0;
 	int flag_if_position = 0;
+	int flag_switch;
 	int l = 2;
 	int i = 0;
 
@@ -42,7 +43,7 @@
 %token INTEGER  VARIABLE
 %token INT ASSIGN SEMICOLON END TAB
 %token COMPARE BIGGER SMALLER BIGGER_THEN SMALLER_THEN DIFFERENT NOT AND OR
-%token IF ELSE ELSE_IF
+%token IF ELSE ELSE_IF SWITCH BREAK CASE COLON DEFAULT
 %token PLUS MINUS TIMES DIVIDE LEFT_PARENTHESIS RIGHT_PARENTHESIS LEFT_KEY RIGHT_KEY
 
 %left PLUS MINUS
@@ -64,6 +65,8 @@ Line:
 	}
 	| If_statement {
 	}
+	| Switch_statement {
+	}
 	| LEFT_KEY {
 		scopeOfFunction = insert_scope(scopeOfFunction, scopeGenerator());
 	}
@@ -76,9 +79,15 @@ Line:
 			else
 				yyerror(2, "return\0");
 		}
-		else if(take_last_if(symbol) != NULL){
-			this_symbol = take_last_if(symbol);
+		else if(take_last(symbol, _IF) != NULL){
+			this_symbol = take_last(symbol, _IF);
 			fprintf(file, ".L%d:\n", l-1);
+			symbol = delete_symbol(symbol, this_symbol);
+			scopeOfFunction = delete_scope(scopeOfFunction);
+		}
+		else if(take_last(symbol, _SWITCH) != NULL){
+			this_symbol = take_last(symbol, _SWITCH);
+			fprintf(file, ".L%d:\n", l);
 			symbol = delete_symbol(symbol, this_symbol);
 			scopeOfFunction = delete_scope(scopeOfFunction);
 		}
@@ -291,6 +300,46 @@ If_statement:
 	}
 	;
 
+Switch_statement:
+	SWITCH LEFT_PARENTHESIS Expression RIGHT_PARENTHESIS {
+		symbol = insert_symbol(symbol, "", scopeOfFunction->scope, _SWITCH, l, 0);
+		fprintf(file, "\nmov eax, %d", $3);
+		flag_switch = 0;
+	}
+	| SWITCH LEFT_PARENTHESIS VARIABLE RIGHT_PARENTHESIS {
+		symbol = insert_symbol(symbol, "", scopeOfFunction->scope, _SWITCH, l, 0);
+		fprintf(file, "\nmov eax, DWORD PTR [rbp-%d]", take_symbol(symbol, $3)->word);
+		flag_switch = 0;
+	}
+	| CASE Expression COLON {
+		if(flag_switch){
+			fprintf(file, "jmp\t.L%d\n", ++l);
+			fprintf(file, ".L%d:\n", l-1);
+		}
+		else {
+			flag_switch = 1;
+		}
+		fprintf(file, "\ncmp\teax, %d\n", $2);
+		fprintf(file, "jne\t.L%d\n", l);
+	}
+	| CASE VARIABLE COLON {
+		if(flag_switch){
+			fprintf(file, "jmp\t.L%d\n", ++l);
+			fprintf(file, ".L%d:\n", l-1);
+		}
+		else {
+			flag_switch = 1;
+		}
+		fprintf(file, "\ncmp\teax, DWORD PTR [rbp-%d]\n", take_symbol(symbol, $2)->word);
+		fprintf(file, "jne\t.L%d\n", l);
+	}
+	| DEFAULT COLON {
+		fprintf(file, "jmp\t.L%d\n", ++l);
+		fprintf(file, ".L%d:\n\n", l-1);
+	}
+	| BREAK SEMICOLON{ /*Nothing do */ }
+	;
+
 Conditional:
 	Expression COMPARE Expression{
 		compare[0] = (char*)malloc(sizeof(char)*20);
@@ -453,7 +502,6 @@ Conditional:
 		*compare[3] = '3';
 	}
 	| LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
-
 	}
 	;
 
