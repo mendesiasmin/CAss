@@ -103,6 +103,7 @@ Line:
 		strcpy(variable, "main");
 		symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _FUNCTION, 0, 0);
 		fprintf(file, "main:\n");
+		fprintf(file, ".LFB0:\n");
 		fprintf(file, "push	rbp\n");
 		fprintf(file, "mov		rbp, rsp\n\n");
 	}
@@ -116,6 +117,7 @@ Line:
 			fprintf(file, "\nmov		eax, %d\n", $2);
 			fprintf(file, "pop		rbp\n");
 			fprintf(file, "ret\n");
+			fprintf(file, "\n.LFE0:\n.Letext0:\n.Ldebug_info0:\n.Ldebug_abbrev0:\n.Ldebug_line0:\n.LASF1:\n.LASF2:\n.LASF0:\n");
 		}
 	}
 	;
@@ -565,6 +567,7 @@ int main(void) {
 	}
 
 	file = fopen("compilado.txt", "a");
+	fprintf(file, ".Ltext0:\n\n");
 
 	yyparse();
 
