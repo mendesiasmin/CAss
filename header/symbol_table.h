@@ -11,6 +11,7 @@
 #define _VARIABLE 3
 #define _SWITCH 4
 #define _WHILE 5
+#define _FOR 6
 
 #endif
 typedef struct Node node;
