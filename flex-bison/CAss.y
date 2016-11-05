@@ -64,7 +64,7 @@ Line:
 	}
 	| If_statement {
 	}
-	| For_statement END {
+	| For_statement {
 	}
 	| Switch_statement {
 	}
@@ -92,6 +92,12 @@ Line:
 		}
 		else if(take_last(symbol, _WHILE) && take_last(symbol, _WHILE)->scope == scopeOfFunction->scope){
 			this_symbol = take_last(symbol, _WHILE);
+			fprintf(file, "jmp .L%d\n", this_symbol->word);
+			fprintf(file, ".L%d:\n", this_symbol->word-1);
+			symbol = delete_symbol(symbol, this_symbol);
+		}
+		else if(take_last(symbol, _FOR) && take_last(symbol, _FOR)->scope == scopeOfFunction->scope){
+			this_symbol = take_last(symbol, _FOR);
 			fprintf(file, "jmp .L%d\n", this_symbol->word);
 			fprintf(file, ".L%d:\n", this_symbol->word-1);
 			symbol = delete_symbol(symbol, this_symbol);
@@ -371,15 +377,28 @@ If_statement:
 	;
 
 For_statement:
-	FOR LEFT_PARENTHESIS Assignment {
-	  actual_label = l++;
-		fprintf(file, "\n.L%d:", actual_label);
-	}
-	Conditional SEMICOLON Assignment RIGHT_PARENTHESIS LEFT_KEY {
-		scopeOfFunction = insert_scope(scopeOfFunction, scopeGenerator());
-		this_symbol = take_last(symbol, _IF);
+	FOR LEFT_PARENTHESIS Assignment SEMICOLON	Conditional SEMICOLON {
+		symbol = insert_symbol(symbol, "", scopeOfFunction->scope, _FOR, ++l, 0);
+		fprintf(file, "\n.L%d:\n", l);
+		switch (*compare[3]) {
+			case '0':
+				fprintf(file, "cmp\t%s, %s\n", compare[0], compare[1]);
+				break;
+			case '1':
+				fprintf(file, "cmp\tDWORD PTR [rbp-%s], %s\n", compare[0], compare[1]);
+				break;
+			case '2':
+				fprintf(file, "cmp\t%s, DWORD PTR [rbp-%s]\n", compare[0], compare[1]);
+				break;
+			case '3':
+				fprintf(file, "mov eax, DWORD PTR [rbp-%s]\n", compare[0]);
+				fprintf(file, "cmp\teax, DWORD PTR [rbp-%s]\n", compare[1]);
+				break;
+		}
+		fprintf(file, "%s\t.L%d\n", compare[2], l-1);
 		l++;
-		fprintf(file, "jump\t.L%d\n\n", actual_label);
+	} Assignment RIGHT_PARENTHESIS{
+		/*Nothing Do*/
 	}
 	;
 
