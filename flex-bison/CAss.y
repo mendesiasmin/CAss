@@ -74,29 +74,40 @@ Line:
 	}
 	| LEFT_KEY {
 		scopeOfFunction = insert_scope(scopeOfFunction, scopeGenerator());
+		printf("In Scope: %s\n", scopeOfFunction->scope);
 	}
 	| RIGHT_KEY {
 		//(symbol);
-		if(!strcmp(scopeOfFunction->next->scope, "global")){
+		printf("Out Scope: %s\t\t", scopeOfFunction->scope);
+		scopeOfFunction = delete_scope(scopeOfFunction);
+		if(!strcmp(scopeOfFunction->scope, "global")){
+			fprintf(file, "close Main\n");
+			printf("main\n");
 			if(!find_symbol(symbol, "return"))
 				yyerror(2, "return\0");
 		}
-		else if(take_last(symbol, _IF) != NULL){
+		else if(take_last(symbol, _IF) != NULL && take_last(symbol, _IF)->scope == scopeOfFunction->scope){
+			printf("if\n");
+			fprintf(file, "close If\n");
 			this_symbol = take_last(symbol, _IF);
-			fprintf(file, ".L%d:\n", l-1);
+			fprintf(file, ".L%d:\n", this_symbol->word);
 			symbol = delete_symbol(symbol, this_symbol);
 		}
-		else if(take_last(symbol, _SWITCH) != NULL){
+		else if(take_last(symbol, _SWITCH) != NULL && take_last(symbol, _SWITCH)->scope == scopeOfFunction->scope){
+			printf("switch\n");
+			fprintf(file, "close Switch\n");
 			this_symbol = take_last(symbol, _SWITCH);
-			fprintf(file, ".L%d:\n", l);
+			fprintf(file, ".L%d:\n", this_symbol->word);
 			symbol = delete_symbol(symbol, this_symbol);
 		}
-		else if(take_last(symbol, _WHILE)){
+		else if(take_last(symbol, _WHILE) && take_last(symbol, _WHILE)->scope == scopeOfFunction->scope){
+			printf("while\n");
+			fprintf(file, "close While\n");
 			this_symbol = take_last(symbol, _WHILE);
 			fprintf(file, "jmp .L%d\n", this_symbol->word);
 			fprintf(file, ".L%d:\n", this_symbol->word-1);
+			symbol = delete_symbol(symbol, this_symbol);
 		}
-			scopeOfFunction = delete_scope(scopeOfFunction);
 	}
 	| INT MAIN LEFT_PARENTHESIS RIGHT_PARENTHESIS{
 		char* variable = (char*)malloc(sizeof(char)*5);
@@ -297,6 +308,7 @@ Expression:
 
 If_statement:
 	IF Conditional {
+		fprintf(file, "IF\n");
 		symbol = insert_symbol(symbol, "IF\0", scopeOfFunction->scope, _IF, l, 0);
 		switch (*compare[3]) {
 			case '0':
@@ -359,8 +371,9 @@ For_statement:
 
 While_statement:
 	DO LEFT_KEY {
-		symbol = insert_symbol(symbol, "", scopeOfFunction->scope, _WHILE, ++l, 0);
-		fprintf(file, "\n.L%d:\n", l);
+		symbol = insert_symbol(symbol, "", scopeOfFunction->scope, _WHILE, l++, 0);
+		fprintf(file, "Do-while\n");
+		fprintf(file, "\n.L%d:\n", l-1);
 	}
 	Input RIGHT_KEY WHILE Conditional SEMICOLON {
 		this_symbol = take_last(symbol, _WHILE);
@@ -379,14 +392,14 @@ While_statement:
 				fprintf(file, "cmp\teax, DWORD PTR [rbp-%s]\n", compare[1]);
 				break;
 		}
-		fprintf(file, "%s\t.L%d\n", compare[2], l-1);
+		fprintf(file, "%s\t.L%d\n", compare[2], l);
 		fprintf(file, "jmp .L%d\n", this_symbol->word);
-		fprintf(file, ".L%d:\n", this_symbol->word-1);
+		fprintf(file, ".L%d:\n", l++);
 		symbol = delete_symbol(symbol, this_symbol);
-
-
+		fprintf(file, "close While 2\n");
 	}
 	| WHILE Conditional {
+		fprintf(file, "WHILE\n");
 		symbol = insert_symbol(symbol, "", scopeOfFunction->scope, _WHILE, ++l, 0);
 		fprintf(file, "\n.L%d:\n", l);
 		switch (*compare[3]) {
@@ -405,23 +418,26 @@ While_statement:
 				break;
 		}
 		fprintf(file, "%s\t.L%d\n", compare[2], l-1);
+		l++;
 	}
 	;
 
 Switch_statement:
 	SWITCH LEFT_PARENTHESIS Expression RIGHT_PARENTHESIS {
+		fprintf(file, "SWITCH\n");
 		symbol = insert_symbol(symbol, "", scopeOfFunction->scope, _SWITCH, l, 0);
 		fprintf(file, "\nmov eax, %d", $3);
 		flag_switch = 0;
 	}
 	| SWITCH LEFT_PARENTHESIS VARIABLE RIGHT_PARENTHESIS {
+		fprintf(file, "SWITCH\n");
 		symbol = insert_symbol(symbol, "", scopeOfFunction->scope, _SWITCH, l, 0);
 		fprintf(file, "\nmov eax, DWORD PTR [rbp-%d]", take_symbol(symbol, $3)->word);
 		flag_switch = 0;
 	}
 	| CASE Expression COLON {
 		if(flag_switch){
-			fprintf(file, "jmp\t.L%d\n", ++l);
+			fprintf(file, "jmp\t.L%d\n", l);
 			fprintf(file, ".L%d:\n", l-1);
 		}
 		else {
@@ -429,10 +445,12 @@ Switch_statement:
 		}
 		fprintf(file, "\ncmp\teax, %d\n", $2);
 		fprintf(file, "jne\t.L%d\n", l);
+		take_last(symbol, _SWITCH)->word = l;
+		l++;
 	}
 	| CASE VARIABLE COLON {
 		if(flag_switch){
-			fprintf(file, "jmp\t.L%d\n", ++l);
+			fprintf(file, "jmp\t.L%d\n", l);
 			fprintf(file, ".L%d:\n", l-1);
 		}
 		else {
@@ -440,10 +458,14 @@ Switch_statement:
 		}
 		fprintf(file, "\ncmp\teax, DWORD PTR [rbp-%d]\n", take_symbol(symbol, $2)->word);
 		fprintf(file, "jne\t.L%d\n", l);
+		take_last(symbol, _SWITCH)->word = l;
+		l++;
 	}
 	| DEFAULT COLON {
-		fprintf(file, "jmp\t.L%d\n", ++l);
+		fprintf(file, "jmp\t.L%d\n", l);
 		fprintf(file, ".L%d:\n\n", l-1);
+		take_last(symbol, _SWITCH)->word = l;
+		l++;
 	}
 	| BREAK SEMICOLON{ /*Nothing do */ }
 	;
