@@ -15,11 +15,9 @@
 	FILE *file;
 	char *variable;
 	char *compare[4];
-	//node *symbol;
 	node* this_symbol;
 	node* this_variable;
 	node* this_variable2;
-	//stack *scopeOfFunction;
 	int word = 4;
 	int flag_if = 0;
 	int flag_if_position = 0;
@@ -194,6 +192,33 @@ Assignment:
 			fprintf(file ,"add DWORD PTR [rbp-%d], 1\n", this_symbol->word);
 		} else {
 			yyerror(2, $1);
+		}
+	}
+	| PLUS PLUS VARIABLE {
+		this_symbol = take_symbol(symbol, $3);
+		if(this_symbol) {
+			this_symbol->value = this_symbol->value + 1;
+			fprintf(file ,"add DWORD PTR [rbp-%d], 1\n", this_symbol->word);
+		} else {
+			yyerror(2, $3);
+		}
+	}
+	| VARIABLE MINUS MINUS {
+		this_symbol = take_symbol(symbol, $1);
+		if(this_symbol) {
+			this_symbol->value = this_symbol->value - 1;
+			fprintf(file ,"sub DWORD PTR [rbp-%d], 1\n", this_symbol->word);
+		} else {
+			yyerror(2, $1);
+		}
+	}
+	| MINUS MINUS VARIABLE {
+		this_symbol = take_symbol(symbol, $3);
+		if(this_symbol) {
+			this_symbol->value = this_symbol->value - 1;
+			fprintf(file ,"sub DWORD PTR [rbp-%d], 1\n", this_symbol->word);
+		} else {
+			yyerror(2, $3);
 		}
 	}
 	;
