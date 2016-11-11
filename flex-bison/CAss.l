@@ -6,6 +6,7 @@
 %}
 
 white [ \t]+
+line [\n]+
 letter [A-Za-z]
 word {letter}+
 symbols [""'/*-+.,<>:?~^=-_!@#$%&º°|)(]
@@ -14,7 +15,10 @@ integer {digit}+
 variable ({word}|_)({word}|integer|_)*
 phrase ({word}|{white}|{symbols}|{digit})*
 barrabarra [//]
-comment ({barrabarra})({phrase})*
+barraasterisco [/*]
+asteriscobarra [*/]
+commentline ({barrabarra})({phrase})*
+comment ({barraasterisco})({phrase}|{line})({asteriscobarra})*	
 
 %%
 
@@ -51,7 +55,11 @@ comment ({barrabarra})({phrase})*
 "{" return (LEFT_KEY);
 "}" return (RIGHT_KEY);
 
+{line} { /*ignore*/ };
+
 {white} { /*ignore*/ };
+
+{commentline} { /*ignore*/ };
 
 {comment} { /*ignore*/ };
 
@@ -67,7 +75,6 @@ comment ({barrabarra})({phrase})*
 }
 
 ";" return (SEMICOLON);
-"\n" { /*ignore*/ };
 "\t" return(TAB);
 
 %%
