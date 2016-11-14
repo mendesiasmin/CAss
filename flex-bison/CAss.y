@@ -23,7 +23,7 @@
 	int flag_if_position = 0;
 	int flag_switch;
 	int l = 2;
-	int actual_label = 0;
+	int n = 0;
 
 %}
 
@@ -181,7 +181,7 @@ Assignment:
 		this_variable2 = take_symbol(symbol, $3);
 		if(this_variable) {
 			if(this_variable2) {
-				this_symbol->value = $3;
+				this_variable->value = this_variable2->value;
 				fprintf(file ,"mov DWORD PTR [rbp-%d], DWORD PTR [rbp-%d]\n", this_variable->word, this_variable2->word);
 			}
 			else {
@@ -349,13 +349,16 @@ If_statement:
 		l++;
 	}
 	| RIGHT_KEY ELSE LEFT_KEY{
+		this_symbol = take_last(symbol, _IF);
 		fprintf(file, "jmp\t.L%d\n", l);
-		fprintf(file, ".L%d:\n\n", l-1);
+		fprintf(file, ".L%d:\n\n", this_symbol->word);
+		this_symbol->word = l;
 		l++;
 	}
 	| RIGHT_KEY ELSE_IF Conditional LEFT_KEY{
+		this_symbol = take_last(symbol, _IF);
 		fprintf(file, "jmp\t.L%d\n", l);
-		fprintf(file, ".L%d:\n", l-1);
+		fprintf(file, ".L%d:\n", this_symbol->word);
 		switch (*compare[3]) {
 			case '0':
 				fprintf(file, "\ncmp\t%s, %s\n", compare[0], compare[1]);
@@ -372,13 +375,14 @@ If_statement:
 				break;
 		}
 		fprintf(file, "%s\t.L%d\n", compare[2], l);
+		this_symbol->word = l;
 		l++;
 	}
 	;
 
 For_statement:
 	FOR LEFT_PARENTHESIS Assignment SEMICOLON	Conditional SEMICOLON {
-		symbol = insert_symbol(symbol, "", scopeOfFunction->scope, _FOR, ++l, 0);
+		symbol = insert_symbol(symbol, "FOR", scopeOfFunction->scope, _FOR, ++l, 0);
 		fprintf(file, "\n.L%d:\n", l);
 		switch (*compare[3]) {
 			case '0':
@@ -404,7 +408,7 @@ For_statement:
 
 While_statement:
 	DO LEFT_KEY {
-		symbol = insert_symbol(symbol, "", scopeOfFunction->scope, _WHILE, l++, 0);
+		symbol = insert_symbol(symbol, "DO", scopeOfFunction->scope, _WHILE, l++, 0);
 		scopeOfFunction = insert_scope(scopeOfFunction, scopeGenerator());
 		fprintf(file, "\n.L%d:\n", l-1);
 	}
@@ -432,7 +436,7 @@ While_statement:
 		scopeOfFunction = delete_scope(scopeOfFunction);
 	}
 	| WHILE Conditional {
-		symbol = insert_symbol(symbol, "", scopeOfFunction->scope, _WHILE, ++l, 0);
+		symbol = insert_symbol(symbol, "WHILE", scopeOfFunction->scope, _WHILE, ++l, 0);
 		fprintf(file, "\n.L%d:\n", l);
 		switch (*compare[3]) {
 			case '0':
@@ -456,46 +460,51 @@ While_statement:
 
 Switch_statement:
 	SWITCH LEFT_PARENTHESIS Expression RIGHT_PARENTHESIS {
-		symbol = insert_symbol(symbol, "", scopeOfFunction->scope, _SWITCH, l, 0);
+		symbol = insert_symbol(symbol, "SWITCH", scopeOfFunction->scope, _SWITCH, l, 0);
 		fprintf(file, "\nmov eax, %d", $3);
 		flag_switch = 0;
 	}
 	| SWITCH LEFT_PARENTHESIS VARIABLE RIGHT_PARENTHESIS {
-		symbol = insert_symbol(symbol, "", scopeOfFunction->scope, _SWITCH, l, 0);
+		symbol = insert_symbol(symbol, "SWITCH", scopeOfFunction->scope, _SWITCH, l, 0);
 		fprintf(file, "\nmov eax, DWORD PTR [rbp-%d]", take_symbol(symbol, $3)->word);
 		flag_switch = 0;
 	}
 	| CASE Expression COLON {
+		this_symbol = take_last(symbol, _SWITCH);
 		if(flag_switch){
 			fprintf(file, "jmp\t.L%d\n", l);
-			fprintf(file, ".L%d:\n", l-1);
+			fprintf(file, ".L%d:\n", this_symbol->word);
 		}
 		else {
 			flag_switch = 1;
 		}
 		fprintf(file, "\ncmp\teax, %d\n", $2);
 		fprintf(file, "jne\t.L%d\n", l);
-		take_last(symbol, _SWITCH)->word = l;
+		this_symbol->word = l;
 		l++;
 	}
 	| CASE VARIABLE COLON {
+		this_symbol = take_last(symbol, _SWITCH);
 		if(flag_switch){
 			fprintf(file, "jmp\t.L%d\n", l);
-			fprintf(file, ".L%d:\n", l-1);
+			fprintf(file, ".L%d:\n", this_symbol->word);
 		}
 		else {
 			flag_switch = 1;
 		}
 		fprintf(file, "\ncmp\teax, DWORD PTR [rbp-%d]\n", take_symbol(symbol, $2)->word);
 		fprintf(file, "jne\t.L%d\n", l);
-		take_last(symbol, _SWITCH)->word = l;
+		this_symbol->word = l;
 		l++;
 	}
 	| DEFAULT COLON {
+		this_symbol = take_last(symbol, _SWITCH);
 		fprintf(file, "jmp\t.L%d\n", l);
-		fprintf(file, ".L%d:\n\n", l-1);
-		take_last(symbol, _SWITCH)->word = l;
+		fprintf(file, ".L%d:\n\n", this_symbol->word);
+		this_symbol->word = l;
 		l++;
+	} Input {
+		//Imprimir o que tem dentro do default
 	}
 	| BREAK SEMICOLON{ /*Nothing do */ }
 	;

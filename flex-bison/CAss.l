@@ -59,7 +59,6 @@ variable ({word}|_)({word}|integer|_)*
 }
 ";" return (SEMICOLON);
 "\n" { /*ignore*/ };
-"\t" return(TAB);
 
 %%
 
