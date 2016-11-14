@@ -17,8 +17,7 @@ phrase ({word}|{white}|{symbols}|{digit})*
 barrabarra [//]
 barraasterisco [/*]
 asteriscobarra [*/]
-commentline ({barrabarra})({phrase})*
-comment ({barraasterisco})({phrase}|{line})({asteriscobarra})*	
+commentline ({barrabarra})({phrase})*	
 
 %%
 
@@ -54,6 +53,8 @@ comment ({barraasterisco})({phrase}|{line})({asteriscobarra})*
 ")" return (RIGHT_PARENTHESIS);
 "{" return (LEFT_KEY);
 "}" return (RIGHT_KEY);
+";" return (SEMICOLON);
+"\t" return(TAB);
 
 {line} { /*ignore*/ };
 
@@ -61,21 +62,24 @@ comment ({barraasterisco})({phrase}|{line})({asteriscobarra})*
 
 {commentline} { /*ignore*/ };
 
-{comment} { /*ignore*/ };
+{barraasterisco} {
+	return (INITIAL);
+};
+
+{asteriscobarra} {
+	return (FINAL);
+};
 
 {variable} {
 	yylval.stringValue = malloc(strlen(yytext));
 	strncpy(yylval.stringValue, yytext, strlen(yytext));
 	return(VARIABLE);
-}
+};
 
 {integer} {
 	yylval.intValue = atoi(yytext);
 	return (INTEGER);
-}
-
-";" return (SEMICOLON);
-"\t" return(TAB);
+};
 
 %%
 
