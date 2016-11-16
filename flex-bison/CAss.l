@@ -47,6 +47,8 @@ variable ({word}|_)({word}|integer|_)*
 "{" return (LEFT_KEY);
 "}" return (RIGHT_KEY);
 {white} { /*ignore*/ };
+"/*" return (INITIAL_COMMENT);
+"*/" return (END_COMMENT);
 
 {variable} {
 	yylval.stringValue = malloc(strlen(yytext));

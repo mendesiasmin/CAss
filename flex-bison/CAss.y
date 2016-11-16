@@ -24,6 +24,7 @@
 	int flag_switch;
 	int l = 2;
 	int n = 0;
+	int comment = false;
 
 %}
 
@@ -44,6 +45,7 @@
 %token IF ELSE ELSE_IF SWITCH BREAK CASE COLON DEFAULT
 %token FOR WHILE DO
 %token PLUS MINUS TIMES DIVIDE LEFT_PARENTHESIS RIGHT_PARENTHESIS LEFT_KEY RIGHT_KEY
+%token INITIAL_COMMENT END_COMMENT
 
 %left PLUS MINUS
 %left TIMES DIVIDE
@@ -59,6 +61,7 @@ Input:
 	| Input Line{
 	}
 	;
+
 Line:
  	Assignment SEMICOLON {
 	}
@@ -125,282 +128,353 @@ Line:
 			fprintf(file, "\n.LFE0:\n.Letext0:\n.Ldebug_info0:\n.Ldebug_abbrev0:\n.Ldebug_line0:\n.LASF1:\n.LASF2:\n.LASF0:\n");
 		}
 	}
+	| INITIAL_COMMENT {
+		comment = true;
+	} Input END_COMMENT {
+		comment = false;
+	}
 	;
+
 Assignment:
 	INT VARIABLE {
-		if(find_symbol(symbol, $2) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $2))) {
-			yyerror(1, $2);
-		} else {
-			char* variable = (char*)malloc(sizeof(strlen($2)));
-			strcpy(variable, $2);
-			symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _INTEGER, word, 0);
-			word += 4;
-			this_symbol = take_symbol(symbol, variable);
-			fprintf(file ,"mov DWORD PTR [rbp-%d], %d\n", this_symbol->word, this_symbol->value);
+		if(!comment){
+			if(find_symbol(symbol, $2) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $2))) {
+				yyerror(1, $2);
+			} else {
+				char* variable = (char*)malloc(sizeof(strlen($2)));
+				strcpy(variable, $2);
+				symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _INTEGER, word, 0);
+				word += 4;
+				this_symbol = take_symbol(symbol, variable);
+				fprintf(file ,"mov DWORD PTR [rbp-%d], %d\n", this_symbol->word, this_symbol->value);
+			}
 		}
 	}
 	| INT VARIABLE ASSIGN Expression {
-
-		if(find_symbol(symbol, $2) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $2))) {
-			yyerror(1, $2);
-		} else {
-			char* variable = (char*)malloc(sizeof(strlen($2)));
-			strcpy(variable, $2);
-			symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _INTEGER, word, $4);
-			word += 4;
-			this_symbol = take_symbol(symbol, variable);
-			fprintf(file ,"mov DWORD PTR [rbp-%d], %d\n", this_symbol->word, this_symbol->value);
+		if(!comment) {
+			if(find_symbol(symbol, $2) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $2))) {
+				yyerror(1, $2);
+			} else {
+				char* variable = (char*)malloc(sizeof(strlen($2)));
+				strcpy(variable, $2);
+				symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _INTEGER, word, $4);
+				word += 4;
+				this_symbol = take_symbol(symbol, variable);
+				fprintf(file ,"mov DWORD PTR [rbp-%d], %d\n", this_symbol->word, this_symbol->value);
+			}
 		}
 	}
 
 	| INT VARIABLE ASSIGN VARIABLE {
-		if(find_symbol(symbol, $2) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $2))) {
-			yyerror(1, $2);
-		} else {
-			char* variable = (char*)malloc(sizeof(strlen($2)));
-			strcpy(variable, $2);
-			this_variable2 = take_symbol(symbol, $4);
-			if(this_variable2) {
-				symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _INTEGER, word, this_variable2->value);
-				word += 4;
-				fprintf(file ,"mov DWORD PTR [rbp-%d], DWORD PTR [rbp-%d]\n", this_symbol->word, this_variable2->word);
+		if(!comment) {
+			if(find_symbol(symbol, $2) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $2))) {
+				yyerror(1, $2);
+			} else {
+				char* variable = (char*)malloc(sizeof(strlen($2)));
+				strcpy(variable, $2);
+				this_variable2 = take_symbol(symbol, $4);
+				if(this_variable2) {
+					symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _INTEGER, word, this_variable2->value);
+					word += 4;
+					fprintf(file ,"mov DWORD PTR [rbp-%d], DWORD PTR [rbp-%d]\n", this_symbol->word, this_variable2->word);
+				}
 			}
 		}
 	}
 	| VARIABLE ASSIGN Expression {
-		this_symbol = take_symbol(symbol, $1);
-		if(this_symbol) {
-			this_symbol->value = $3;
-			fprintf(file ,"mov DWORD PTR [rbp-%d], %d\n", this_symbol->word, this_symbol->value);
-		} else {
-			yyerror(2, $1);
+			if(!comment) {
+			this_symbol = take_symbol(symbol, $1);
+			if(this_symbol) {
+				this_symbol->value = $3;
+				fprintf(file ,"mov DWORD PTR [rbp-%d], %d\n", this_symbol->word, this_symbol->value);
+			} else {
+				yyerror(2, $1);
+			}
 		}
 	}
 	| VARIABLE ASSIGN VARIABLE {
-		this_variable = take_symbol(symbol, $1);
-		this_variable2 = take_symbol(symbol, $3);
-		if(this_variable) {
-			if(this_variable2) {
-				this_variable->value = this_variable2->value;
-				fprintf(file ,"mov DWORD PTR [rbp-%d], DWORD PTR [rbp-%d]\n", this_variable->word, this_variable2->word);
+		if(!comment) {
+			this_variable = take_symbol(symbol, $1);
+			this_variable2 = take_symbol(symbol, $3);
+			if(this_variable) {
+				if(this_variable2) {
+					this_variable->value = this_variable2->value;
+					fprintf(file ,"mov DWORD PTR [rbp-%d], DWORD PTR [rbp-%d]\n", this_variable->word, this_variable2->word);
+				}
+				else {
+					yyerror(2, $3);
+				}
+			} else {
+				yyerror(2, $1);
 			}
-			else {
-				yyerror(2, $3);
-			}
-		} else {
-			yyerror(2, $1);
 		}
 	}
 	| VARIABLE PLUS PLUS {
-		this_symbol = take_symbol(symbol, $1);
-		if(this_symbol) {
-			this_symbol->value = this_symbol->value + 1;
-			fprintf(file ,"add DWORD PTR [rbp-%d], 1\n", this_symbol->word);
-		} else {
-			yyerror(2, $1);
+		if(!comment) {
+			this_symbol = take_symbol(symbol, $1);
+			if(this_symbol) {
+				this_symbol->value = this_symbol->value + 1;
+				fprintf(file ,"add DWORD PTR [rbp-%d], 1\n", this_symbol->word);
+			} else {
+				yyerror(2, $1);
+			}
 		}
 	}
 	| PLUS PLUS VARIABLE {
-		this_symbol = take_symbol(symbol, $3);
-		if(this_symbol) {
-			this_symbol->value = this_symbol->value + 1;
-			fprintf(file ,"add DWORD PTR [rbp-%d], 1\n", this_symbol->word);
-		} else {
-			yyerror(2, $3);
+		if(!comment) {
+			this_symbol = take_symbol(symbol, $3);
+			if(this_symbol) {
+				this_symbol->value = this_symbol->value + 1;
+				fprintf(file ,"add DWORD PTR [rbp-%d], 1\n", this_symbol->word);
+			} else {
+				yyerror(2, $3);
+			}
 		}
 	}
 	| VARIABLE MINUS MINUS {
-		this_symbol = take_symbol(symbol, $1);
-		if(this_symbol) {
-			this_symbol->value = this_symbol->value - 1;
-			fprintf(file ,"sub DWORD PTR [rbp-%d], 1\n", this_symbol->word);
-		} else {
-			yyerror(2, $1);
+		if(!comment) {
+			this_symbol = take_symbol(symbol, $1);
+			if(this_symbol) {
+				this_symbol->value = this_symbol->value - 1;
+				fprintf(file ,"sub DWORD PTR [rbp-%d], 1\n", this_symbol->word);
+			} else {
+				yyerror(2, $1);
+			}
 		}
 	}
 	| MINUS MINUS VARIABLE {
-		this_symbol = take_symbol(symbol, $3);
-		if(this_symbol) {
-			this_symbol->value = this_symbol->value - 1;
-			fprintf(file ,"sub DWORD PTR [rbp-%d], 1\n", this_symbol->word);
-		} else {
-			yyerror(2, $3);
+		if(!comment) {
+			this_symbol = take_symbol(symbol, $3);
+			if(this_symbol) {
+				this_symbol->value = this_symbol->value - 1;
+				fprintf(file ,"sub DWORD PTR [rbp-%d], 1\n", this_symbol->word);
+			} else {
+				yyerror(2, $3);
+			}
 		}
 	}
 	;
 
 Expression:
 	INTEGER {
-		$$ = $1;
+		if(!comment) {
+			$$ = $1;
+		}
 	}
 	| Expression PLUS Expression{
-		$$ = $1 + $3;
+		if(!comment) {
+			$$ = $1 + $3;
+		}
 	}
 	| VARIABLE PLUS Expression{
-		this_symbol = take_symbol(symbol, $1);
-		if(!this_symbol) yyerror(2, $1);
-		else $$ = this_symbol->value + $3;
+		if(!comment) {
+			this_symbol = take_symbol(symbol, $1);
+			if(!this_symbol) yyerror(2, $1);
+			else $$ = this_symbol->value + $3;
+		}
 	}
 	| Expression PLUS VARIABLE{
-		this_symbol = take_symbol(symbol, $3);
-		if(!this_symbol) yyerror(2, $3);
-		else $$ = $1 + this_symbol->value;
+		if(!comment) {
+			this_symbol = take_symbol(symbol, $3);
+			if(!this_symbol) yyerror(2, $3);
+			else $$ = $1 + this_symbol->value;
+		}
 	}
 	| VARIABLE PLUS VARIABLE{
-		this_symbol = take_symbol(symbol, $1);
-		this_variable = take_symbol(symbol, $3);
-		if(!this_symbol) yyerror(2, $1);
-		else if(!this_variable) yyerror(2, $3);
-		else $$ = this_symbol->value + this_variable->value;
+		if(!comment) {
+			this_symbol = take_symbol(symbol, $1);
+			this_variable = take_symbol(symbol, $3);
+			if(!this_symbol) yyerror(2, $1);
+			else if(!this_variable) yyerror(2, $3);
+			else $$ = this_symbol->value + this_variable->value;
+		}
 	}
 	| Expression MINUS Expression{
-		$$ = $1 - $3;
+		if(!comment) {
+			$$ = $1 - $3;
+		}
 	}
 	| VARIABLE MINUS Expression{
-		this_symbol = take_symbol(symbol, $1);
-		if(!this_symbol) yyerror(2, $1);
-		else $$ = this_symbol->value - $3;
+		if(!comment) {
+			this_symbol = take_symbol(symbol, $1);
+			if(!this_symbol) yyerror(2, $1);
+			else $$ = this_symbol->value - $3;
+		}
 	}
 	| Expression MINUS VARIABLE{
-		this_symbol = take_symbol(symbol, $3);
-		if(!this_symbol) yyerror(2, $3);
-		else $$ = $1 - this_symbol->value;
+		if(!comment) {
+			this_symbol = take_symbol(symbol, $3);
+			if(!this_symbol) yyerror(2, $3);
+			else $$ = $1 - this_symbol->value;
+		}
 	}
 	| VARIABLE MINUS VARIABLE{
-		this_symbol = take_symbol(symbol, $1);
-		this_variable = take_symbol(symbol, $3);
-		if(!this_symbol) yyerror(2, $1);
-		else if(!this_variable) yyerror(2, $3);
-		else $$ = this_symbol->value - this_variable->value;
+		if(!comment) {
+			this_symbol = take_symbol(symbol, $1);
+			this_variable = take_symbol(symbol, $3);
+			if(!this_symbol) yyerror(2, $1);
+			else if(!this_variable) yyerror(2, $3);
+			else $$ = this_symbol->value - this_variable->value;
+		}
 	}
 	| Expression TIMES Expression{
-		$$ = $1 * $3;
+		if(!comment) {
+			$$ = $1 * $3;
+		}
 	}
 	| VARIABLE TIMES Expression{
-		this_symbol = take_symbol(symbol, $1);
-		if(!this_symbol) yyerror(2, $1);
-		else $$ = this_symbol->value * $3;
+		if(!comment) {
+			this_symbol = take_symbol(symbol, $1);
+			if(!this_symbol) yyerror(2, $1);
+			else $$ = this_symbol->value * $3;
+		}
 	}
 	| Expression TIMES VARIABLE{
-		this_symbol = take_symbol(symbol, $3);
-		if(!this_symbol) yyerror(2, $3);
-		else $$ = $1 * this_symbol->value;
+		if(!comment) {
+			this_symbol = take_symbol(symbol, $3);
+			if(!this_symbol) yyerror(2, $3);
+			else $$ = $1 * this_symbol->value;
+		}
 	}
 	| VARIABLE TIMES VARIABLE{
-		this_symbol = take_symbol(symbol, $1);
-		this_variable = take_symbol(symbol, $3);
-		if(!this_symbol) yyerror(2, $1);
-		else if(!this_variable) yyerror(2, $3);
-		else $$ = this_symbol->value * this_variable->value;
+		if(!comment) {
+			this_symbol = take_symbol(symbol, $1);
+			this_variable = take_symbol(symbol, $3);
+			if(!this_symbol) yyerror(2, $1);
+			else if(!this_variable) yyerror(2, $3);
+			else $$ = this_symbol->value * this_variable->value;
+		}
 	}
 	| Expression DIVIDE Expression{
-		$$ = $1 / $3;
+		if(!comment) {
+			$$ = $1 / $3;
+		}
 	}
 	| VARIABLE DIVIDE Expression{
-		this_symbol = take_symbol(symbol, $1);
-		if(!this_symbol) yyerror(2, $1);
-		else $$ = this_symbol->value / $3;
+		if(!comment) {
+			this_symbol = take_symbol(symbol, $1);
+			if(!this_symbol) yyerror(2, $1);
+			else $$ = this_symbol->value / $3;
+		}
 	}
 	| Expression DIVIDE VARIABLE{
-		this_symbol = take_symbol(symbol, $3);
-		if(!this_symbol) yyerror(2, $3);
-		else $$ = $1 / this_symbol->value;
+		if(!comment) {
+			this_symbol = take_symbol(symbol, $3);
+			if(!this_symbol) yyerror(2, $3);
+			else $$ = $1 / this_symbol->value;
+		}
 	}
 	| VARIABLE DIVIDE VARIABLE{
-		this_symbol = take_symbol(symbol, $1);
-		this_variable = take_symbol(symbol, $3);
-		if(!this_symbol) yyerror(2, $1);
-		else if(!this_variable) yyerror(2, $3);
-		else $$ = this_symbol->value / this_variable->value;
+		if(!comment) {
+			this_symbol = take_symbol(symbol, $1);
+			this_variable = take_symbol(symbol, $3);
+			if(!this_symbol) yyerror(2, $1);
+			else if(!this_variable) yyerror(2, $3);
+			else $$ = this_symbol->value / this_variable->value;
+		}
 	}
 	|  MINUS Expression %prec NEG{
-		$$ = -$2;
+		if(!comment) {
+			$$ = -$2;
+		}
 	}
 	|  MINUS VARIABLE %prec NEG{
-		this_symbol = take_symbol(symbol, $2);
-		if(!this_symbol) yyerror(2, $2);
-		else $$ = -this_symbol->value;
+		if(!comment) {
+			this_symbol = take_symbol(symbol, $2);
+			if(!this_symbol) yyerror(2, $2);
+			else $$ = -this_symbol->value;
+		}
 	}
 
 	| LEFT_PARENTHESIS Expression RIGHT_PARENTHESIS {
-		$$ = $2;
+		if(!comment) {
+			$$ = $2;
+		}
 	}
   ;
 
 If_statement:
 	IF Conditional {
-		symbol = insert_symbol(symbol, "IF\0", scopeOfFunction->scope, _IF, l, 0);
-		switch (*compare[3]) {
-			case '0':
-				fprintf(file, "\ncmp\t%s, %s\n", compare[0], compare[1]);
-				break;
-			case '1':
-				fprintf(file, "\ncmp\tDWORD PTR [rbp-%s], %s\n", compare[0], compare[1]);
-				break;
-			case '2':
-				fprintf(file, "\ncmp\t%s, DWORD PTR [rbp-%s]\n", compare[0], compare[1]);
-				break;
-			case '3':
-				fprintf(file, "\nmov eax, DWORD PTR [rbp-%s]\n", compare[0]);
-				fprintf(file, "cmp\teax, DWORD PTR [rbp-%s]\n", compare[1]);
-				break;
+		if(!comment) {
+			symbol = insert_symbol(symbol, "IF\0", scopeOfFunction->scope, _IF, l, 0);
+			switch (*compare[3]) {
+				case '0':
+					fprintf(file, "\ncmp\t%s, %s\n", compare[0], compare[1]);
+					break;
+				case '1':
+					fprintf(file, "\ncmp\tDWORD PTR [rbp-%s], %s\n", compare[0], compare[1]);
+					break;
+				case '2':
+					fprintf(file, "\ncmp\t%s, DWORD PTR [rbp-%s]\n", compare[0], compare[1]);
+					break;
+				case '3':
+					fprintf(file, "\nmov eax, DWORD PTR [rbp-%s]\n", compare[0]);
+					fprintf(file, "cmp\teax, DWORD PTR [rbp-%s]\n", compare[1]);
+					break;
+			}
+			fprintf(file, "%s\t.L%d\n", compare[2], l);
+			l++;
 		}
-		fprintf(file, "%s\t.L%d\n", compare[2], l);
-		l++;
 	}
 	| RIGHT_KEY ELSE LEFT_KEY{
-		this_symbol = take_last(symbol, _IF);
-		fprintf(file, "jmp\t.L%d\n", l);
-		fprintf(file, ".L%d:\n\n", this_symbol->word);
-		this_symbol->word = l;
-		l++;
+		if(!comment) {
+			this_symbol = take_last(symbol, _IF);
+			fprintf(file, "jmp\t.L%d\n", l);
+			fprintf(file, ".L%d:\n\n", this_symbol->word);
+			this_symbol->word = l;
+			l++;
+		}
 	}
 	| RIGHT_KEY ELSE_IF Conditional LEFT_KEY{
-		this_symbol = take_last(symbol, _IF);
-		fprintf(file, "jmp\t.L%d\n", l);
-		fprintf(file, ".L%d:\n", this_symbol->word);
-		switch (*compare[3]) {
-			case '0':
-				fprintf(file, "\ncmp\t%s, %s\n", compare[0], compare[1]);
-				break;
-			case '1':
-				fprintf(file, "\ncmp\tDWORD PTR [rbp-%s], %s\n", compare[0], compare[1]);
-				break;
-			case '2':
-				fprintf(file, "\ncmp\t%s, DWORD PTR [rbp-%s]\n", compare[0], compare[1]);
-				break;
-			case '3':
-				fprintf(file, "\nmov eax, DWORD PTR [rbp-%s]\n", compare[0]);
-				fprintf(file, "cmp\teax, DWORD PTR [rbp-%s]\n", compare[1]);
-				break;
+		if(!comment) {
+			this_symbol = take_last(symbol, _IF);
+			fprintf(file, "jmp\t.L%d\n", l);
+			fprintf(file, ".L%d:\n", this_symbol->word);
+			switch (*compare[3]) {
+				case '0':
+					fprintf(file, "\ncmp\t%s, %s\n", compare[0], compare[1]);
+					break;
+				case '1':
+					fprintf(file, "\ncmp\tDWORD PTR [rbp-%s], %s\n", compare[0], compare[1]);
+					break;
+				case '2':
+					fprintf(file, "\ncmp\t%s, DWORD PTR [rbp-%s]\n", compare[0], compare[1]);
+					break;
+				case '3':
+					fprintf(file, "\nmov eax, DWORD PTR [rbp-%s]\n", compare[0]);
+					fprintf(file, "cmp\teax, DWORD PTR [rbp-%s]\n", compare[1]);
+					break;
+			}
+			fprintf(file, "%s\t.L%d\n", compare[2], l);
+			this_symbol->word = l;
+			l++;
 		}
-		fprintf(file, "%s\t.L%d\n", compare[2], l);
-		this_symbol->word = l;
-		l++;
 	}
 	;
 
 For_statement:
 	FOR LEFT_PARENTHESIS Assignment SEMICOLON	Conditional SEMICOLON {
-		symbol = insert_symbol(symbol, "FOR", scopeOfFunction->scope, _FOR, ++l, 0);
-		fprintf(file, "\n.L%d:\n", l);
-		switch (*compare[3]) {
-			case '0':
-				fprintf(file, "cmp\t%s, %s\n", compare[0], compare[1]);
-				break;
-			case '1':
-				fprintf(file, "cmp\tDWORD PTR [rbp-%s], %s\n", compare[0], compare[1]);
-				break;
-			case '2':
-				fprintf(file, "cmp\t%s, DWORD PTR [rbp-%s]\n", compare[0], compare[1]);
-				break;
-			case '3':
-				fprintf(file, "mov eax, DWORD PTR [rbp-%s]\n", compare[0]);
-				fprintf(file, "cmp\teax, DWORD PTR [rbp-%s]\n", compare[1]);
-				break;
+		if(!comment) {
+			symbol = insert_symbol(symbol, "FOR", scopeOfFunction->scope, _FOR, ++l, 0);
+			fprintf(file, "\n.L%d:\n", l);
+			switch (*compare[3]) {
+				case '0':
+					fprintf(file, "cmp\t%s, %s\n", compare[0], compare[1]);
+					break;
+				case '1':
+					fprintf(file, "cmp\tDWORD PTR [rbp-%s], %s\n", compare[0], compare[1]);
+					break;
+				case '2':
+					fprintf(file, "cmp\t%s, DWORD PTR [rbp-%s]\n", compare[0], compare[1]);
+					break;
+				case '3':
+					fprintf(file, "mov eax, DWORD PTR [rbp-%s]\n", compare[0]);
+					fprintf(file, "cmp\teax, DWORD PTR [rbp-%s]\n", compare[1]);
+					break;
+			}
+			fprintf(file, "%s\t.L%d\n", compare[2], l-1);
+			l++;
 		}
-		fprintf(file, "%s\t.L%d\n", compare[2], l-1);
-		l++;
 	} Assignment RIGHT_PARENTHESIS{
 		/*Nothing Do*/
 	}
@@ -408,101 +482,117 @@ For_statement:
 
 While_statement:
 	DO LEFT_KEY {
-		symbol = insert_symbol(symbol, "DO", scopeOfFunction->scope, _WHILE, l++, 0);
-		scopeOfFunction = insert_scope(scopeOfFunction, scopeGenerator());
-		fprintf(file, "\n.L%d:\n", l-1);
+		if(!comment) {
+			symbol = insert_symbol(symbol, "DO", scopeOfFunction->scope, _WHILE, l++, 0);
+			scopeOfFunction = insert_scope(scopeOfFunction, scopeGenerator());
+			fprintf(file, "\n.L%d:\n", l-1);
+		}
 	}
 	Input RIGHT_KEY WHILE Conditional SEMICOLON {
-		this_symbol = take_last(symbol, _WHILE);
-		switch (*compare[3]) {
-			case '0':
-				fprintf(file, "cmp\t%s, %s\n", compare[0], compare[1]);
-				break;
-			case '1':
-				fprintf(file, "cmp\tDWORD PTR [rbp-%s], %s\n", compare[0], compare[1]);
-				break;
-			case '2':
-				fprintf(file, "cmp\t%s, DWORD PTR [rbp-%s]\n", compare[0], compare[1]);
-				break;
-			case '3':
-				fprintf(file, "mov eax, DWORD PTR [rbp-%s]\n", compare[0]);
-				fprintf(file, "cmp\teax, DWORD PTR [rbp-%s]\n", compare[1]);
-				break;
+		if(!comment) {
+			this_symbol = take_last(symbol, _WHILE);
+			switch (*compare[3]) {
+				case '0':
+					fprintf(file, "cmp\t%s, %s\n", compare[0], compare[1]);
+					break;
+				case '1':
+					fprintf(file, "cmp\tDWORD PTR [rbp-%s], %s\n", compare[0], compare[1]);
+					break;
+				case '2':
+					fprintf(file, "cmp\t%s, DWORD PTR [rbp-%s]\n", compare[0], compare[1]);
+					break;
+				case '3':
+					fprintf(file, "mov eax, DWORD PTR [rbp-%s]\n", compare[0]);
+					fprintf(file, "cmp\teax, DWORD PTR [rbp-%s]\n", compare[1]);
+					break;
+			}
+			fprintf(file, "%s\t.L%d\n", compare[2], l);
+			fprintf(file, "jmp .L%d\n", this_symbol->word);
+			fprintf(file, ".L%d:\n", l++);
+			symbol = delete_symbol(symbol, this_symbol);
+			scopeOfFunction = delete_scope(scopeOfFunction);
 		}
-		fprintf(file, "%s\t.L%d\n", compare[2], l);
-		fprintf(file, "jmp .L%d\n", this_symbol->word);
-		fprintf(file, ".L%d:\n", l++);
-		symbol = delete_symbol(symbol, this_symbol);
-		scopeOfFunction = delete_scope(scopeOfFunction);
 	}
 	| WHILE Conditional {
-		symbol = insert_symbol(symbol, "WHILE", scopeOfFunction->scope, _WHILE, ++l, 0);
-		fprintf(file, "\n.L%d:\n", l);
-		switch (*compare[3]) {
-			case '0':
-				fprintf(file, "cmp\t%s, %s\n", compare[0], compare[1]);
-				break;
-			case '1':
-				fprintf(file, "cmp\tDWORD PTR [rbp-%s], %s\n", compare[0], compare[1]);
-				break;
-			case '2':
-				fprintf(file, "cmp\t%s, DWORD PTR [rbp-%s]\n", compare[0], compare[1]);
-				break;
-			case '3':
-				fprintf(file, "mov eax, DWORD PTR [rbp-%s]\n", compare[0]);
-				fprintf(file, "cmp\teax, DWORD PTR [rbp-%s]\n", compare[1]);
-				break;
+		if(!comment) {
+			symbol = insert_symbol(symbol, "WHILE", scopeOfFunction->scope, _WHILE, ++l, 0);
+			fprintf(file, "\n.L%d:\n", l);
+			switch (*compare[3]) {
+				case '0':
+					fprintf(file, "cmp\t%s, %s\n", compare[0], compare[1]);
+					break;
+				case '1':
+					fprintf(file, "cmp\tDWORD PTR [rbp-%s], %s\n", compare[0], compare[1]);
+					break;
+				case '2':
+					fprintf(file, "cmp\t%s, DWORD PTR [rbp-%s]\n", compare[0], compare[1]);
+					break;
+				case '3':
+					fprintf(file, "mov eax, DWORD PTR [rbp-%s]\n", compare[0]);
+					fprintf(file, "cmp\teax, DWORD PTR [rbp-%s]\n", compare[1]);
+					break;
+			}
+			fprintf(file, "%s\t.L%d\n", compare[2], l-1);
+			l++;
 		}
-		fprintf(file, "%s\t.L%d\n", compare[2], l-1);
-		l++;
 	}
 	;
 
 Switch_statement:
 	SWITCH LEFT_PARENTHESIS Expression RIGHT_PARENTHESIS {
-		symbol = insert_symbol(symbol, "SWITCH", scopeOfFunction->scope, _SWITCH, l, 0);
-		fprintf(file, "\nmov eax, %d", $3);
-		flag_switch = 0;
+		if(!comment) {
+			symbol = insert_symbol(symbol, "SWITCH", scopeOfFunction->scope, _SWITCH, l, 0);
+			fprintf(file, "\nmov eax, %d", $3);
+			flag_switch = 0;
+		}
 	}
 	| SWITCH LEFT_PARENTHESIS VARIABLE RIGHT_PARENTHESIS {
-		symbol = insert_symbol(symbol, "SWITCH", scopeOfFunction->scope, _SWITCH, l, 0);
-		fprintf(file, "\nmov eax, DWORD PTR [rbp-%d]", take_symbol(symbol, $3)->word);
-		flag_switch = 0;
+		if(!comment) {
+			symbol = insert_symbol(symbol, "SWITCH", scopeOfFunction->scope, _SWITCH, l, 0);
+			fprintf(file, "\nmov eax, DWORD PTR [rbp-%d]", take_symbol(symbol, $3)->word);
+			flag_switch = 0;
+		}
 	}
 	| CASE Expression COLON {
-		this_symbol = take_last(symbol, _SWITCH);
-		if(flag_switch){
-			fprintf(file, "jmp\t.L%d\n", l);
-			fprintf(file, ".L%d:\n", this_symbol->word);
+		if(!comment) {
+			this_symbol = take_last(symbol, _SWITCH);
+			if(flag_switch){
+				fprintf(file, "jmp\t.L%d\n", l);
+				fprintf(file, ".L%d:\n", this_symbol->word);
+			}
+			else {
+				flag_switch = 1;
+			}
+			fprintf(file, "\ncmp\teax, %d\n", $2);
+			fprintf(file, "jne\t.L%d\n", l);
+			this_symbol->word = l;
+			l++;
 		}
-		else {
-			flag_switch = 1;
-		}
-		fprintf(file, "\ncmp\teax, %d\n", $2);
-		fprintf(file, "jne\t.L%d\n", l);
-		this_symbol->word = l;
-		l++;
 	}
 	| CASE VARIABLE COLON {
-		this_symbol = take_last(symbol, _SWITCH);
-		if(flag_switch){
-			fprintf(file, "jmp\t.L%d\n", l);
-			fprintf(file, ".L%d:\n", this_symbol->word);
+		if(!comment) {
+			this_symbol = take_last(symbol, _SWITCH);
+			if(flag_switch){
+				fprintf(file, "jmp\t.L%d\n", l);
+				fprintf(file, ".L%d:\n", this_symbol->word);
+			}
+			else {
+				flag_switch = 1;
+			}
+			fprintf(file, "\ncmp\teax, DWORD PTR [rbp-%d]\n", take_symbol(symbol, $2)->word);
+			fprintf(file, "jne\t.L%d\n", l);
+			this_symbol->word = l;
+			l++;
 		}
-		else {
-			flag_switch = 1;
-		}
-		fprintf(file, "\ncmp\teax, DWORD PTR [rbp-%d]\n", take_symbol(symbol, $2)->word);
-		fprintf(file, "jne\t.L%d\n", l);
-		this_symbol->word = l;
-		l++;
 	}
 	| DEFAULT COLON {
-		this_symbol = take_last(symbol, _SWITCH);
-		fprintf(file, "jmp\t.L%d\n", l);
-		fprintf(file, ".L%d:\n\n", this_symbol->word);
-		this_symbol->word = l;
-		l++;
+		if(!comment) {
+			this_symbol = take_last(symbol, _SWITCH);
+			fprintf(file, "jmp\t.L%d\n", l);
+			fprintf(file, ".L%d:\n\n", this_symbol->word);
+			this_symbol->word = l;
+			l++;
+		}
 	} Input {
 		//Imprimir o que tem dentro do default
 	}
@@ -511,164 +601,196 @@ Switch_statement:
 
 Conditional:
 	Expression COMPARE Expression{
-		compare[0] = (char*)malloc(sizeof(char)*20);
-		snprintf(compare[0], 20, "%d", $1);
-		compare[1] = (char*)malloc(sizeof(char)*20);
-		snprintf(compare[1], 20, "%d", $3);
-		compare[2] = (char*)malloc(sizeof(char)*4);
-		strcpy(compare[2], "jne");
-		compare[3] = (char*)malloc(sizeof(char));
-		*compare[3] = '0';
+		if(!comment) {
+			compare[0] = (char*)malloc(sizeof(char)*20);
+			snprintf(compare[0], 20, "%d", $1);
+			compare[1] = (char*)malloc(sizeof(char)*20);
+			snprintf(compare[1], 20, "%d", $3);
+			compare[2] = (char*)malloc(sizeof(char)*4);
+			strcpy(compare[2], "jne");
+			compare[3] = (char*)malloc(sizeof(char));
+			*compare[3] = '0';
+		}
 	}
 	| VARIABLE COMPARE Expression{
-		compare[0] = (char*)malloc(sizeof(char)*10);
-		snprintf(compare[0], 20, "%d", take_symbol(symbol, $1)->word);
-		compare[1] = (char*)malloc(sizeof(char)*20);
-		snprintf(compare[1], 20, "%d", $3);
-		compare[2] = (char*)malloc(sizeof(char)*4);
-		strcpy(compare[2], "jne");
-		compare[3] = (char*)malloc(sizeof(char));
-		*compare[3] = '1';
+		if(!comment) {
+			compare[0] = (char*)malloc(sizeof(char)*10);
+			snprintf(compare[0], 20, "%d", take_symbol(symbol, $1)->word);
+			compare[1] = (char*)malloc(sizeof(char)*20);
+			snprintf(compare[1], 20, "%d", $3);
+			compare[2] = (char*)malloc(sizeof(char)*4);
+			strcpy(compare[2], "jne");
+			compare[3] = (char*)malloc(sizeof(char));
+			*compare[3] = '1';
+		}
 	}
 	| Expression COMPARE VARIABLE{
-		compare[0] = (char*)malloc(sizeof(char)*20);
-		snprintf(compare[0], 20, "%d", $1);
-		compare[1] = (char*)malloc(sizeof(char)*10);
-		snprintf(compare[1], 20, "%d", take_symbol(symbol, $3)->word);
-		compare[2] = (char*)malloc(sizeof(char)*4);
-		strcpy(compare[2], "jne");
-		compare[3] = (char*)malloc(sizeof(char));
-		*compare[3] = '2';
+		if(!comment) {
+			compare[0] = (char*)malloc(sizeof(char)*20);
+			snprintf(compare[0], 20, "%d", $1);
+			compare[1] = (char*)malloc(sizeof(char)*10);
+			snprintf(compare[1], 20, "%d", take_symbol(symbol, $3)->word);
+			compare[2] = (char*)malloc(sizeof(char)*4);
+			strcpy(compare[2], "jne");
+			compare[3] = (char*)malloc(sizeof(char));
+			*compare[3] = '2';
+		}
 	}
 	| VARIABLE COMPARE VARIABLE {
-		compare[0] = (char*)malloc(sizeof(char)*20);
-		snprintf(compare[0], 20, "%d", take_symbol(symbol, $1)->word);
-		compare[1] = (char*)malloc(sizeof(char)*10);
-		snprintf(compare[1], 20, "%d", take_symbol(symbol, $3)->word);
-		compare[2] = (char*)malloc(sizeof(char)*4);
-		strcpy(compare[2], "jne");
-		compare[3] = (char*)malloc(sizeof(char));
-		*compare[3] = '3';
+		if(!comment) {
+			compare[0] = (char*)malloc(sizeof(char)*20);
+			snprintf(compare[0], 20, "%d", take_symbol(symbol, $1)->word);
+			compare[1] = (char*)malloc(sizeof(char)*10);
+			snprintf(compare[1], 20, "%d", take_symbol(symbol, $3)->word);
+			compare[2] = (char*)malloc(sizeof(char)*4);
+			strcpy(compare[2], "jne");
+			compare[3] = (char*)malloc(sizeof(char));
+			*compare[3] = '3';
+		}
 	}
 	| Expression DIFFERENT Expression{
-		compare[0] = (char*)malloc(sizeof(char)*20);
-		snprintf(compare[0], 20, "%d", $1);
-		compare[1] = (char*)malloc(sizeof(char)*20);
-		snprintf(compare[1], 20, "%d", $3);
-		compare[2] = (char*)malloc(sizeof(char)*4);
-		strcpy(compare[2], "je");
-		compare[3] = (char*)malloc(sizeof(char));
-		*compare[3] = '0';
+		if(!comment) {
+			compare[0] = (char*)malloc(sizeof(char)*20);
+			snprintf(compare[0], 20, "%d", $1);
+			compare[1] = (char*)malloc(sizeof(char)*20);
+			snprintf(compare[1], 20, "%d", $3);
+			compare[2] = (char*)malloc(sizeof(char)*4);
+			strcpy(compare[2], "je");
+			compare[3] = (char*)malloc(sizeof(char));
+			*compare[3] = '0';
+		}
 	}
 	| VARIABLE DIFFERENT Expression{
-		compare[0] = (char*)malloc(sizeof(char)*10);
-		snprintf(compare[0], 20, "%d", take_symbol(symbol, $1)->word);
-		compare[1] = (char*)malloc(sizeof(char)*20);
-		snprintf(compare[1], 20, "%d", $3);
-		compare[2] = (char*)malloc(sizeof(char)*4);
-		strcpy(compare[2], "je");
-		compare[3] = (char*)malloc(sizeof(char));
-		*compare[3] = '1';
+		if(!comment) {
+			compare[0] = (char*)malloc(sizeof(char)*10);
+			snprintf(compare[0], 20, "%d", take_symbol(symbol, $1)->word);
+			compare[1] = (char*)malloc(sizeof(char)*20);
+			snprintf(compare[1], 20, "%d", $3);
+			compare[2] = (char*)malloc(sizeof(char)*4);
+			strcpy(compare[2], "je");
+			compare[3] = (char*)malloc(sizeof(char));
+			*compare[3] = '1';
+		}
 	}
 	| Expression DIFFERENT VARIABLE{
-		compare[0] = (char*)malloc(sizeof(char)*20);
-		snprintf(compare[0], 20, "%d", $1);
-		compare[1] = (char*)malloc(sizeof(char)*10);
-		snprintf(compare[1], 20, "%d", take_symbol(symbol, $3)->word);
-		compare[2] = (char*)malloc(sizeof(char)*4);
-		strcpy(compare[2], "je");
-		compare[3] = (char*)malloc(sizeof(char));
-		*compare[3] = '2';
+		if(!comment) {
+			compare[0] = (char*)malloc(sizeof(char)*20);
+			snprintf(compare[0], 20, "%d", $1);
+			compare[1] = (char*)malloc(sizeof(char)*10);
+			snprintf(compare[1], 20, "%d", take_symbol(symbol, $3)->word);
+			compare[2] = (char*)malloc(sizeof(char)*4);
+			strcpy(compare[2], "je");
+			compare[3] = (char*)malloc(sizeof(char));
+			*compare[3] = '2';
+		}
 	}
 	| VARIABLE DIFFERENT VARIABLE {
-		compare[0] = (char*)malloc(sizeof(char)*20);
-		snprintf(compare[0], 20, "%d", take_symbol(symbol, $1)->word);
-		compare[1] = (char*)malloc(sizeof(char)*10);
-		snprintf(compare[1], 20, "%d", take_symbol(symbol, $3)->word);
-		compare[2] = (char*)malloc(sizeof(char)*4);
-		strcpy(compare[2], "je");
-		compare[3] = (char*)malloc(sizeof(char));
-		*compare[3] = '3';
+		if(!comment) {
+			compare[0] = (char*)malloc(sizeof(char)*20);
+			snprintf(compare[0], 20, "%d", take_symbol(symbol, $1)->word);
+			compare[1] = (char*)malloc(sizeof(char)*10);
+			snprintf(compare[1], 20, "%d", take_symbol(symbol, $3)->word);
+			compare[2] = (char*)malloc(sizeof(char)*4);
+			strcpy(compare[2], "je");
+			compare[3] = (char*)malloc(sizeof(char));
+			*compare[3] = '3';
+		}
 	}
 	| Expression SMALLER_THEN Expression{
-		compare[0] = (char*)malloc(sizeof(char)*20);
-		snprintf(compare[0], 20, "%d", $1);
-		compare[1] = (char*)malloc(sizeof(char)*20);
-		snprintf(compare[1], 20, "%d", $3);
-		compare[2] = (char*)malloc(sizeof(char)*4);
-		strcpy(compare[2], "jg");
-		compare[3] = (char*)malloc(sizeof(char));
-		*compare[3] = '0';
+		if(!comment) {
+			compare[0] = (char*)malloc(sizeof(char)*20);
+			snprintf(compare[0], 20, "%d", $1);
+			compare[1] = (char*)malloc(sizeof(char)*20);
+			snprintf(compare[1], 20, "%d", $3);
+			compare[2] = (char*)malloc(sizeof(char)*4);
+			strcpy(compare[2], "jg");
+			compare[3] = (char*)malloc(sizeof(char));
+			*compare[3] = '0';
+		}
 	}
 	| VARIABLE SMALLER_THEN Expression{
-		compare[0] = (char*)malloc(sizeof(char)*10);
-		snprintf(compare[0], 20, "%d", take_symbol(symbol, $1)->word);
-		compare[1] = (char*)malloc(sizeof(char)*20);
-		snprintf(compare[1], 20, "%d", $3);
-		compare[2] = (char*)malloc(sizeof(char)*4);
-		strcpy(compare[2], "jg");
-		compare[3] = (char*)malloc(sizeof(char));
-		*compare[3] = '1';
+		if(!comment) {
+			compare[0] = (char*)malloc(sizeof(char)*10);
+			snprintf(compare[0], 20, "%d", take_symbol(symbol, $1)->word);
+			compare[1] = (char*)malloc(sizeof(char)*20);
+			snprintf(compare[1], 20, "%d", $3);
+			compare[2] = (char*)malloc(sizeof(char)*4);
+			strcpy(compare[2], "jg");
+			compare[3] = (char*)malloc(sizeof(char));
+			*compare[3] = '1';
+		}
 	}
 	| Expression SMALLER_THEN VARIABLE{
-		compare[0] = (char*)malloc(sizeof(char)*20);
-		snprintf(compare[0], 20, "%d", $1);
-		compare[1] = (char*)malloc(sizeof(char)*10);
-		snprintf(compare[1], 20, "%d", take_symbol(symbol, $3)->word);
-		compare[2] = (char*)malloc(sizeof(char)*4);
-		strcpy(compare[2], "jg");
-		compare[3] = (char*)malloc(sizeof(char));
-		*compare[3] = '2';
+		if(!comment) {
+			compare[0] = (char*)malloc(sizeof(char)*20);
+			snprintf(compare[0], 20, "%d", $1);
+			compare[1] = (char*)malloc(sizeof(char)*10);
+			snprintf(compare[1], 20, "%d", take_symbol(symbol, $3)->word);
+			compare[2] = (char*)malloc(sizeof(char)*4);
+			strcpy(compare[2], "jg");
+			compare[3] = (char*)malloc(sizeof(char));
+			*compare[3] = '2';
+		}
 	}
 	| VARIABLE SMALLER_THEN VARIABLE {
-		compare[0] = (char*)malloc(sizeof(char)*20);
-		snprintf(compare[0], 20, "%d", take_symbol(symbol, $1)->word);
-		compare[1] = (char*)malloc(sizeof(char)*10);
-		snprintf(compare[1], 20, "%d", take_symbol(symbol, $3)->word);
-		compare[2] = (char*)malloc(sizeof(char)*4);
-		strcpy(compare[2], "jg");
-		compare[3] = (char*)malloc(sizeof(char));
-		*compare[3] = '3';
+		if(!comment) {
+			compare[0] = (char*)malloc(sizeof(char)*20);
+			snprintf(compare[0], 20, "%d", take_symbol(symbol, $1)->word);
+			compare[1] = (char*)malloc(sizeof(char)*10);
+			snprintf(compare[1], 20, "%d", take_symbol(symbol, $3)->word);
+			compare[2] = (char*)malloc(sizeof(char)*4);
+			strcpy(compare[2], "jg");
+			compare[3] = (char*)malloc(sizeof(char));
+			*compare[3] = '3';
+		}
 	}
 	| Expression BIGGER_THEN Expression{
-		compare[0] = (char*)malloc(sizeof(char)*20);
-		snprintf(compare[0], 20, "%d", $1);
-		compare[1] = (char*)malloc(sizeof(char)*20);
-		snprintf(compare[1], 20, "%d", $3);
-		compare[2] = (char*)malloc(sizeof(char)*4);
-		strcpy(compare[2], "jle");
-		compare[3] = (char*)malloc(sizeof(char));
-		*compare[3] = '0';
+		if(!comment) {
+			compare[0] = (char*)malloc(sizeof(char)*20);
+			snprintf(compare[0], 20, "%d", $1);
+			compare[1] = (char*)malloc(sizeof(char)*20);
+			snprintf(compare[1], 20, "%d", $3);
+			compare[2] = (char*)malloc(sizeof(char)*4);
+			strcpy(compare[2], "jle");
+			compare[3] = (char*)malloc(sizeof(char));
+			*compare[3] = '0';
+		}
 	}
 	| VARIABLE BIGGER_THEN Expression{
-		compare[0] = (char*)malloc(sizeof(char)*10);
-		snprintf(compare[0], 20, "%d", take_symbol(symbol, $1)->word);
-		compare[1] = (char*)malloc(sizeof(char)*20);
-		snprintf(compare[1], 20, "%d", $3);
-		compare[2] = (char*)malloc(sizeof(char)*4);
-		strcpy(compare[2], "jle");
-		compare[3] = (char*)malloc(sizeof(char));
-		*compare[3] = '1';
+		if(!comment) {
+			compare[0] = (char*)malloc(sizeof(char)*10);
+			snprintf(compare[0], 20, "%d", take_symbol(symbol, $1)->word);
+			compare[1] = (char*)malloc(sizeof(char)*20);
+			snprintf(compare[1], 20, "%d", $3);
+			compare[2] = (char*)malloc(sizeof(char)*4);
+			strcpy(compare[2], "jle");
+			compare[3] = (char*)malloc(sizeof(char));
+			*compare[3] = '1';
+		}
 	}
 	| Expression BIGGER_THEN VARIABLE{
-		compare[0] = (char*)malloc(sizeof(char)*20);
-		snprintf(compare[0], 20, "%d", $1);
-		compare[1] = (char*)malloc(sizeof(char)*10);
-		snprintf(compare[1], 20, "%d", take_symbol(symbol, $3)->word);
-		compare[2] = (char*)malloc(sizeof(char)*4);
-		strcpy(compare[2], "jle");
-		compare[3] = (char*)malloc(sizeof(char));
-		*compare[3] = '2';
+		if(!comment) {
+			compare[0] = (char*)malloc(sizeof(char)*20);
+			snprintf(compare[0], 20, "%d", $1);
+			compare[1] = (char*)malloc(sizeof(char)*10);
+			snprintf(compare[1], 20, "%d", take_symbol(symbol, $3)->word);
+			compare[2] = (char*)malloc(sizeof(char)*4);
+			strcpy(compare[2], "jle");
+			compare[3] = (char*)malloc(sizeof(char));
+			*compare[3] = '2';
+		}
 	}
 	| VARIABLE BIGGER_THEN VARIABLE {
-		compare[0] = (char*)malloc(sizeof(char)*20);
-		snprintf(compare[0], 20, "%d", take_symbol(symbol, $1)->word);
-		compare[1] = (char*)malloc(sizeof(char)*10);
-		snprintf(compare[1], 20, "%d", take_symbol(symbol, $3)->word);
-		compare[2] = (char*)malloc(sizeof(char)*4);
-		strcpy(compare[2], "jle");
-		compare[3] = (char*)malloc(sizeof(char));
-		*compare[3] = '3';
+		if(!comment) {
+			compare[0] = (char*)malloc(sizeof(char)*20);
+			snprintf(compare[0], 20, "%d", take_symbol(symbol, $1)->word);
+			compare[1] = (char*)malloc(sizeof(char)*10);
+			snprintf(compare[1], 20, "%d", take_symbol(symbol, $3)->word);
+			compare[2] = (char*)malloc(sizeof(char)*4);
+			strcpy(compare[2], "jle");
+			compare[3] = (char*)malloc(sizeof(char));
+			*compare[3] = '3';
+		}
 	}
 	| LEFT_PARENTHESIS Conditional RIGHT_PARENTHESIS{
 	}
