@@ -40,7 +40,7 @@
 
 %token MAIN RETURN
 %token INTEGER  VARIABLE
-%token INT ASSIGN SEMICOLON END TAB
+%token INT ASSIGN SEMICOLON END TAB INITIAL FINAL
 %token COMPARE BIGGER SMALLER BIGGER_THEN SMALLER_THEN DIFFERENT NOT AND OR
 %token IF ELSE ELSE_IF SWITCH BREAK CASE COLON DEFAULT
 %token FOR WHILE DO
@@ -77,7 +77,6 @@ Line:
 		scopeOfFunction = insert_scope(scopeOfFunction, scopeGenerator());
 	}
 	| RIGHT_KEY {
-		//(symbol);
 		scopeOfFunction = delete_scope(scopeOfFunction);
 		if(!strcmp(scopeOfFunction->scope, "global")){
 			if(!find_symbol(symbol, "return"))
@@ -164,7 +163,6 @@ Assignment:
 			}
 		}
 	}
-
 	| INT VARIABLE ASSIGN VARIABLE {
 		if(!comment) {
 			if(find_symbol(symbol, $2) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $2))) {
@@ -838,7 +836,6 @@ int main(void) {
 	fprintf(file, ".Ltext0:\n\n");
 
 	yyparse();
-
 
 	fclose(file);
 
