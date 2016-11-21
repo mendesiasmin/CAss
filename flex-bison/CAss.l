@@ -15,11 +15,8 @@ symbols [""'/*-+.,<>:?~^=-_!@#$%&º°|)(]
 variable ({word}|_)({word}|integer|_)*
 phrase ({word}|{white}|{symbols}|{digit})*
 barrabarra [//]
-barra_asterisco[/*]
-asterisco_barra[*/]
 commentline ({barrabarra})({phrase})*
-initial_comment({barra_asterisco})({phrase})*
-end_comment({asterisco_barra})
+
 %%
 
 "int" return (INT);
@@ -54,16 +51,11 @@ end_comment({asterisco_barra})
 ")" return (RIGHT_PARENTHESIS);
 "{" return (LEFT_KEY);
 "}" return (RIGHT_KEY);
+"/*" return (INITIAL_COMMENT);
+"*/" return (END_COMMENT);
 {white} { /*ignore*/ };
 {commentline} {
 	/* ignore */
-}
-
-{initial_comment} {
-	return(INITIAL_COMMENT);
-}
-{end_comment} {
-	return(END_COMMENT);
 }
 {variable} {
 	yylval.stringValue = malloc(strlen(yytext));
