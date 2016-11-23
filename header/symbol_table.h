@@ -39,7 +39,7 @@ node* insert_symbol(node *list, char *symbol, char *scope, int type, int word, i
 /* Search the variable name in the same scope */
 int find_symbol(node *list, char *symbol);
 void imprime(node *list);
-char* take_scope_of_symbol(node *list, char *symbol);
+char* take_scope_of_symbol(node *list, char *symbol, char* scope_actual);
 node* take_symbol(node *list, char *symbol);
 node* take_last(node *list, int type);
 node* take_last_symbol(node *list);

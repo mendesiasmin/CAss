@@ -79,11 +79,11 @@ int find_symbol(node *list, char *symbol) {
 	return FALSE;
 }
 
-char* take_scope_of_symbol(node *list, char *symbol) {
+char* take_scope_of_symbol(node *list, char *symbol, char* scope_actual) {
 	node *iterator_list = list;
 
 	while(iterator_list != NULL) {
-		if(strcmp(symbol, iterator_list->symbol) == 0) {
+		if((strcmp(symbol, iterator_list->symbol) == 0) && (strcmp(scope_actual, iterator_list->scope) == 0)) {
 			return iterator_list->scope;
 		}
 		iterator_list = iterator_list->next;

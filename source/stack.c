@@ -42,11 +42,11 @@ char *take_scope(stack *list) {
 
 	return scope;
 }
-int find_scope(stack *list, char* scope) {
+int find_scope(stack *list, char* scope, char* scope_actual) {
 	stack *iterator_list = list;
 
 	while(iterator_list != NULL) {
-		if(strcmp(scope, iterator_list->scope) == 0) {
+		if((strcmp(scope, iterator_list->scope) == 0) && (strcmp(scope_actual, iterator_list->scope) == 0)) {
 			return TRUE;
 		}
 		iterator_list = iterator_list->next;

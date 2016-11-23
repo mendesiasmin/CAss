@@ -20,7 +20,6 @@ commentline ({barrabarra})({phrase})*
 %%
 
 "int" return (INT);
-"main" return (MAIN);
 "return" return (RETURN);
 "for" return (FOR);
 "if" return (IF);

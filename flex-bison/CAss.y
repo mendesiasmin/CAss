@@ -38,7 +38,7 @@
 %type <intValue> Expression INTEGER
 %type <stringValue> VARIABLE Conditional
 
-%token MAIN RETURN
+%token RETURN
 %token INTEGER  VARIABLE
 %token INT ASSIGN SEMICOLON END TAB
 %token COMPARE BIGGER SMALLER BIGGER_THEN SMALLER_THEN DIFFERENT NOT AND OR
@@ -105,11 +105,11 @@ Line:
 			symbol = delete_symbol(symbol, this_symbol);
 		}
 	}
-	| INT MAIN LEFT_PARENTHESIS RIGHT_PARENTHESIS {
+	| INT VARIABLE LEFT_PARENTHESIS RIGHT_PARENTHESIS {
 		char* variable = (char*)malloc(sizeof(char)*5);
-		strcpy(variable, "main");
+		strcpy(variable, $2);
 		symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _FUNCTION, 0, 0);
-		fprintf(file, "main:\n");
+		fprintf(file, "%s:\n", $2);
 		fprintf(file, ".LFB0:\n");
 		fprintf(file, "push	rbp\n");
 		fprintf(file, "mov		rbp, rsp\n\n");
@@ -124,7 +124,7 @@ Line:
 			fprintf(file, "\nmov		eax, %d\n", $2);
 			fprintf(file, "pop		rbp\n");
 			fprintf(file, "ret\n");
-			fprintf(file, "\n.LFE0:\n.Letext0:\n.Ldebug_info0:\n.Ldebug_abbrev0:\n.Ldebug_line0:\n.LASF1:\n.LASF2:\n.LASF0:\n");
+			fprintf(file, "\n.LFE0:\n.Letext0:\n.Ldebug_info0:\n.Ldebug_abbrev0:\n.Ldebug_line0:\n.LASF1:\n.LASF2:\n.LASF0:\n\n");
 		}
 	}
 	| INITIAL_COMMENT {
@@ -137,7 +137,8 @@ Line:
 Assignment:
 	INT VARIABLE {
 		if(!comment){
-			if(find_symbol(symbol, $2) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $2))) {
+			if(find_symbol(symbol, $2) &&
+				find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $2, scopeOfFunction->scope), scopeOfFunction->scope)) {
 				yyerror(1, $2);
 			} else {
 				char* variable = (char*)malloc(sizeof(strlen($2)));
@@ -151,7 +152,7 @@ Assignment:
 	}
 	| INT VARIABLE ASSIGN Expression {
 		if(!comment) {
-			if(find_symbol(symbol, $2) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $2))) {
+			if(find_symbol(symbol, $2) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $2, scopeOfFunction->scope), scopeOfFunction->scope)) {
 				yyerror(1, $2);
 			} else {
 				char* variable = (char*)malloc(sizeof(strlen($2)));
@@ -165,7 +166,7 @@ Assignment:
 	}
 	| INT VARIABLE ASSIGN VARIABLE {
 		if(!comment) {
-			if(find_symbol(symbol, $2) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $2))) {
+			if(find_symbol(symbol, $2) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $2, scopeOfFunction->scope), scopeOfFunction->scope)) {
 				yyerror(1, $2);
 			} else {
 				char* variable = (char*)malloc(sizeof(strlen($2)));
