@@ -24,6 +24,7 @@
 	int flag_switch;
 	int l = 2;
 	int n = 0;
+	int funcao = 0;
 	int comment = false;
 
 %}
@@ -31,8 +32,8 @@
 %union
 {
 	char *stringValue;
-  int intValue;
-  int bool;
+	int intValue;
+	int bool;
 }
 
 %type <intValue> Expression INTEGER
@@ -110,7 +111,7 @@ Line:
 		strcpy(variable, $2);
 		symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _FUNCTION, 0, 0);
 		fprintf(file, "%s:\n", $2);
-		fprintf(file, ".LFB0:\n");
+		fprintf(file, ".LFB%d:\n", funcao);
 		fprintf(file, "push	rbp\n");
 		fprintf(file, "mov		rbp, rsp\n\n");
 	}
@@ -124,7 +125,23 @@ Line:
 			fprintf(file, "\nmov		eax, %d\n", $2);
 			fprintf(file, "pop		rbp\n");
 			fprintf(file, "ret\n");
-			fprintf(file, "\n.LFE0:\n.Letext0:\n.Ldebug_info0:\n.Ldebug_abbrev0:\n.Ldebug_line0:\n.LASF1:\n.LASF2:\n.LASF0:\n\n");
+			fprintf(file, "\n.LFE%d:\n.Letext%d:\n.Ldebug_info%d:\n.Ldebug_abbrev%d:\n.Ldebug_line%d:\n.LASF1:\n.LASF2:\n.LASF0:\n\n", funcao, funcao, funcao, funcao, funcao);
+			funcao++;
+		}
+	}
+	| RETURN VARIABLE SEMICOLON RIGHT_KEY{
+		if(find_symbol(symbol, $2) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $2, scopeOfFunction->scope), scopeOfFunction->scope)) {
+			char* variable = (char*)malloc(sizeof(char)*7);
+			strcpy(variable, "return");
+			symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _FUNCTION, 0, $2);
+			this_symbol = take_symbol(symbol, $2);
+			fprintf(file, "\nmov		eax, %d\n", this_symbol->value);
+			fprintf(file, "pop		rbp\n");
+			fprintf(file, "ret\n");
+			fprintf(file, "\n.LFE%d:\n.Letext%d:\n.Ldebug_info%d:\n.Ldebug_abbrev%d:\n.Ldebug_line%d:\n.LASF1:\n.LASF2:\n.LASF0:\n\n", funcao, funcao, funcao, funcao, funcao);
+			funcao++;
+		} else {
+			yyerror(3,"");
 		}
 	}
 	| INITIAL_COMMENT {
