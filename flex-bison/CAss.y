@@ -105,6 +105,9 @@ Line:
 			fprintf(file, ".L%d:\n", this_symbol->word-1);
 			symbol = delete_symbol(symbol, this_symbol);
 		}
+		else if(!(take_last(symbol, _RETURN) && take_last(symbol, _RETURN)->scope == scopeOfFunction->scope)){
+			yyerror(2, "return\0");
+		}
 	}
 	| INT VARIABLE LEFT_PARENTHESIS RIGHT_PARENTHESIS {
 		char* variable = (char*)malloc(sizeof(char)*5);
@@ -141,7 +144,7 @@ Line:
 			fprintf(file, "\n.LFE%d:\n.Letext%d:\n.Ldebug_info%d:\n.Ldebug_abbrev%d:\n.Ldebug_line%d:\n.LASF1:\n.LASF2:\n.LASF0:\n\n", funcao, funcao, funcao, funcao, funcao);
 			funcao++;
 		} else {
-			yyerror(3,"");
+			yyerror(2, $2);
 		}
 	}
 	| INITIAL_COMMENT {
@@ -830,6 +833,9 @@ int yyerror(int typeError, char* variable) {
 			break;
 		case 4:
 			printf("Condicao invalida no laco do/while\n");
+			break;
+		case 5:
+			printf("Função deveria retornar um inteiro\n");
 			break;
 		//default:
 			//nothing to do
