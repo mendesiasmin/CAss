@@ -82,7 +82,6 @@ Line:
 		scopeOfFunction = insert_scope(scopeOfFunction, scopeGenerator());
 	}
 	| RIGHT_KEY {
-		//(symbol);
 		scopeOfFunction = delete_scope(scopeOfFunction);
 		if(!strcmp(scopeOfFunction->scope, "global")){
 		}
@@ -165,7 +164,6 @@ Assignment:
 			}
 		}
 	}
-
 	| INT VARIABLE ASSIGN VARIABLE {
 		if(!comment) {
 			if(find_symbol(symbol, $2) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $2))) {
@@ -847,7 +845,6 @@ int main(void) {
 	fprintf(file, ".Ltext0:\n\n");
 
 	yyparse();
-
 
 	fclose(file);
 	fclose(fileIn);

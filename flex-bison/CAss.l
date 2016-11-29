@@ -12,7 +12,11 @@ letter [A-Za-z]
 word {letter}+
 digit [0-9]
 integer {digit}+
+symbols [""'/*-+.,<>:?~^=-_!@#$%&º°|)(]
 variable ({word}|_)({word}|integer|_)*
+phrase ({word}|{white}|{symbols}|{digit})*
+barrabarra [//]
+commentline ({barrabarra})({phrase})*
 
 %%
 
@@ -51,7 +55,9 @@ variable ({word}|_)({word}|integer|_)*
 {white} { /*ignore*/ };
 "/*" return (INITIAL_COMMENT);
 "*/" return (END_COMMENT);
-
+{commentline} {
+	/* ignore */
+}
 {variable} {
 	yylval.stringValue = malloc(strlen(yytext));
 	strncpy(yylval.stringValue, yytext, strlen(yytext));
