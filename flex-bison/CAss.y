@@ -12,7 +12,10 @@
 #define false 0
 
 	extern FILE *yyin;
+	extern char* yytext;
+	extern int yylineno;
 	FILE *file;
+	FILE *fileIn;
 	char *variable;
 	char *compare[4];
 	node* this_symbol;
@@ -60,6 +63,8 @@ Input:
 	/*    */
 	| Input Line{
 	}
+	| error {
+	}
 	;
 
 Line:
@@ -80,8 +85,6 @@ Line:
 		//(symbol);
 		scopeOfFunction = delete_scope(scopeOfFunction);
 		if(!strcmp(scopeOfFunction->scope, "global")){
-			if(!find_symbol(symbol, "return"))
-				yyerror(2, "return\0");
 		}
 		else if(take_last(symbol, _IF) != NULL && take_last(symbol, _IF)->scope == scopeOfFunction->scope){
 			this_symbol = take_last(symbol, _IF);
@@ -117,7 +120,7 @@ Line:
 	}
 	| RETURN INTEGER SEMICOLON RIGHT_KEY{
 		if(scopeOfFunction->next == NULL ||  !find_symbol(symbol, "main"))
-			yyerror(3,"");
+		{}
 		else{
 			char* variable = (char*)malloc(sizeof(char)*7);
 			strcpy(variable, "return");
@@ -139,7 +142,6 @@ Assignment:
 	INT VARIABLE {
 		if(!comment){
 			if(find_symbol(symbol, $2) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $2))) {
-				yyerror(1, $2);
 			} else {
 				char* variable = (char*)malloc(sizeof(strlen($2)));
 				strcpy(variable, $2);
@@ -153,7 +155,6 @@ Assignment:
 	| INT VARIABLE ASSIGN Expression {
 		if(!comment) {
 			if(find_symbol(symbol, $2) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $2))) {
-				yyerror(1, $2);
 			} else {
 				char* variable = (char*)malloc(sizeof(strlen($2)));
 				strcpy(variable, $2);
@@ -168,7 +169,6 @@ Assignment:
 	| INT VARIABLE ASSIGN VARIABLE {
 		if(!comment) {
 			if(find_symbol(symbol, $2) && find_scope(scopeOfFunction, take_scope_of_symbol(symbol, $2))) {
-				yyerror(1, $2);
 			} else {
 				char* variable = (char*)malloc(sizeof(strlen($2)));
 				strcpy(variable, $2);
@@ -188,7 +188,6 @@ Assignment:
 				this_symbol->value = $3;
 				fprintf(file ,"mov DWORD PTR [rbp-%d], %d\n", this_symbol->word, this_symbol->value);
 			} else {
-				yyerror(2, $1);
 			}
 		}
 	}
@@ -201,11 +200,6 @@ Assignment:
 					this_variable->value = this_variable2->value;
 					fprintf(file ,"mov DWORD PTR [rbp-%d], DWORD PTR [rbp-%d]\n", this_variable->word, this_variable2->word);
 				}
-				else {
-					yyerror(2, $3);
-				}
-			} else {
-				yyerror(2, $1);
 			}
 		}
 	}
@@ -215,8 +209,6 @@ Assignment:
 			if(this_symbol) {
 				this_symbol->value = this_symbol->value + 1;
 				fprintf(file ,"add DWORD PTR [rbp-%d], 1\n", this_symbol->word);
-			} else {
-				yyerror(2, $1);
 			}
 		}
 	}
@@ -226,8 +218,6 @@ Assignment:
 			if(this_symbol) {
 				this_symbol->value = this_symbol->value + 1;
 				fprintf(file ,"add DWORD PTR [rbp-%d], 1\n", this_symbol->word);
-			} else {
-				yyerror(2, $3);
 			}
 		}
 	}
@@ -237,8 +227,6 @@ Assignment:
 			if(this_symbol) {
 				this_symbol->value = this_symbol->value - 1;
 				fprintf(file ,"sub DWORD PTR [rbp-%d], 1\n", this_symbol->word);
-			} else {
-				yyerror(2, $1);
 			}
 		}
 	}
@@ -248,8 +236,6 @@ Assignment:
 			if(this_symbol) {
 				this_symbol->value = this_symbol->value - 1;
 				fprintf(file ,"sub DWORD PTR [rbp-%d], 1\n", this_symbol->word);
-			} else {
-				yyerror(2, $3);
 			}
 		}
 	}
@@ -269,14 +255,14 @@ Expression:
 	| VARIABLE PLUS Expression{
 		if(!comment) {
 			this_symbol = take_symbol(symbol, $1);
-			if(!this_symbol) yyerror(2, $1);
+			if(!this_symbol) {}
 			else $$ = this_symbol->value + $3;
 		}
 	}
 	| Expression PLUS VARIABLE{
 		if(!comment) {
 			this_symbol = take_symbol(symbol, $3);
-			if(!this_symbol) yyerror(2, $3);
+			if(!this_symbol){}
 			else $$ = $1 + this_symbol->value;
 		}
 	}
@@ -284,8 +270,8 @@ Expression:
 		if(!comment) {
 			this_symbol = take_symbol(symbol, $1);
 			this_variable = take_symbol(symbol, $3);
-			if(!this_symbol) yyerror(2, $1);
-			else if(!this_variable) yyerror(2, $3);
+			if(!this_symbol) {}
+			else if(!this_variable) {}
 			else $$ = this_symbol->value + this_variable->value;
 		}
 	}
@@ -297,14 +283,14 @@ Expression:
 	| VARIABLE MINUS Expression{
 		if(!comment) {
 			this_symbol = take_symbol(symbol, $1);
-			if(!this_symbol) yyerror(2, $1);
+			if(!this_symbol) {}
 			else $$ = this_symbol->value - $3;
 		}
 	}
 	| Expression MINUS VARIABLE{
 		if(!comment) {
 			this_symbol = take_symbol(symbol, $3);
-			if(!this_symbol) yyerror(2, $3);
+			if(!this_symbol) {}
 			else $$ = $1 - this_symbol->value;
 		}
 	}
@@ -312,8 +298,8 @@ Expression:
 		if(!comment) {
 			this_symbol = take_symbol(symbol, $1);
 			this_variable = take_symbol(symbol, $3);
-			if(!this_symbol) yyerror(2, $1);
-			else if(!this_variable) yyerror(2, $3);
+			if(!this_symbol) {}
+			else if(!this_variable) {}
 			else $$ = this_symbol->value - this_variable->value;
 		}
 	}
@@ -325,14 +311,14 @@ Expression:
 	| VARIABLE TIMES Expression{
 		if(!comment) {
 			this_symbol = take_symbol(symbol, $1);
-			if(!this_symbol) yyerror(2, $1);
+			if(!this_symbol) {}
 			else $$ = this_symbol->value * $3;
 		}
 	}
 	| Expression TIMES VARIABLE{
 		if(!comment) {
 			this_symbol = take_symbol(symbol, $3);
-			if(!this_symbol) yyerror(2, $3);
+			if(!this_symbol) {}
 			else $$ = $1 * this_symbol->value;
 		}
 	}
@@ -340,8 +326,8 @@ Expression:
 		if(!comment) {
 			this_symbol = take_symbol(symbol, $1);
 			this_variable = take_symbol(symbol, $3);
-			if(!this_symbol) yyerror(2, $1);
-			else if(!this_variable) yyerror(2, $3);
+			if(!this_symbol) {}
+			else if(!this_variable) {}
 			else $$ = this_symbol->value * this_variable->value;
 		}
 	}
@@ -353,14 +339,14 @@ Expression:
 	| VARIABLE DIVIDE Expression{
 		if(!comment) {
 			this_symbol = take_symbol(symbol, $1);
-			if(!this_symbol) yyerror(2, $1);
+			if(!this_symbol) {}
 			else $$ = this_symbol->value / $3;
 		}
 	}
 	| Expression DIVIDE VARIABLE{
 		if(!comment) {
 			this_symbol = take_symbol(symbol, $3);
-			if(!this_symbol) yyerror(2, $3);
+			if(!this_symbol) {}
 			else $$ = $1 / this_symbol->value;
 		}
 	}
@@ -368,8 +354,8 @@ Expression:
 		if(!comment) {
 			this_symbol = take_symbol(symbol, $1);
 			this_variable = take_symbol(symbol, $3);
-			if(!this_symbol) yyerror(2, $1);
-			else if(!this_variable) yyerror(2, $3);
+			if(!this_symbol) {}
+			else if(!this_variable) {}
 			else $$ = this_symbol->value / this_variable->value;
 		}
 	}
@@ -381,7 +367,7 @@ Expression:
 	|  MINUS VARIABLE %prec NEG{
 		if(!comment) {
 			this_symbol = take_symbol(symbol, $2);
-			if(!this_symbol) yyerror(2, $2);
+			if(!this_symbol) {}
 			else $$ = -this_symbol->value;
 		}
 	}
@@ -798,7 +784,7 @@ Conditional:
 
 %%
 
-int yyerror(int typeError, char* variable) {
+/*int _yyerror(int typeError, char* variable) {
 
 	printf("ERROR:\n");
 
@@ -819,6 +805,29 @@ int yyerror(int typeError, char* variable) {
 			//nothing to do
 	}
 	exit(0);
+}*/
+
+void printLineOfError(int lineError) {
+
+	fileIn = fopen("in.txt", "r");
+	if(fileIn != NULL) {
+		char line[501];
+		int count = 0;
+
+		do {
+			fgets(line, sizeof(line), fileIn);
+			if(line == NULL) break;
+			count++;
+	  } while (count != lineError);
+
+		if(line != NULL) printf("%s", line);
+	}
+}
+
+extern
+void yyerror(char *s) {
+  printf("%d %s ", yylineno, s);
+	printLineOfError(yylineno);
 }
 
 int main(void) {
@@ -827,7 +836,7 @@ int main(void) {
 	scopeOfFunction = create_stack();
 	scopeOfFunction = insert_scope(scopeOfFunction, "global");
 
-	file = fopen("compilado.txt", "r");
+		file = fopen("compilado.txt", "r");
 
 	if(file != NULL){
 		fclose(file);
@@ -841,6 +850,7 @@ int main(void) {
 
 
 	fclose(file);
+	fclose(fileIn);
 
 	free(file);
 	free(variable);

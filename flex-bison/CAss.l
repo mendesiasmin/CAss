@@ -1,3 +1,5 @@
+%option yylineno
+
 %{
 #include "sintatico.h"
 #include <stdlib.h>
