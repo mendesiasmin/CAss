@@ -22,6 +22,7 @@
 	node* this_variable;
 	node* this_variable2;
 	int word = 4;
+	int function = 0;
 	int flag_if = 0;
 	int flag_if_position = 0;
 	int flag_switch;
@@ -41,7 +42,7 @@
 %type <intValue> Expression INTEGER
 %type <stringValue> VARIABLE Conditional
 
-%token MAIN RETURN
+%token RETURN
 %token INTEGER  VARIABLE
 %token INT ASSIGN SEMICOLON END TAB
 %token COMPARE BIGGER SMALLER BIGGER_THEN SMALLER_THEN DIFFERENT NOT AND OR
@@ -63,6 +64,8 @@ Input:
 	/*    */
 	| Input Line{
 	}
+	| Input Function {
+	}
 	| error {
 	}
 	;
@@ -82,11 +85,8 @@ Line:
 		scopeOfFunction = insert_scope(scopeOfFunction, scopeGenerator());
 	}
 	| RIGHT_KEY {
-		//(symbol);
 		scopeOfFunction = delete_scope(scopeOfFunction);
-		if(!strcmp(scopeOfFunction->scope, "global")){
-		}
-		else if(take_last(symbol, _IF) != NULL && take_last(symbol, _IF)->scope == scopeOfFunction->scope){
+		if(take_last(symbol, _IF) != NULL && take_last(symbol, _IF)->scope == scopeOfFunction->scope){
 			this_symbol = take_last(symbol, _IF);
 			fprintf(file, ".L%d:\n", this_symbol->word);
 			symbol = delete_symbol(symbol, this_symbol);
@@ -108,33 +108,69 @@ Line:
 			fprintf(file, ".L%d:\n", this_symbol->word-1);
 			symbol = delete_symbol(symbol, this_symbol);
 		}
-	}
-	| INT MAIN LEFT_PARENTHESIS RIGHT_PARENTHESIS {
-		char* variable = (char*)malloc(sizeof(char)*5);
-		strcpy(variable, "main");
-		symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _FUNCTION, 0, 0);
-		fprintf(file, "main:\n");
-		fprintf(file, ".LFB0:\n");
-		fprintf(file, "push	rbp\n");
-		fprintf(file, "mov		rbp, rsp\n\n");
-	}
-	| RETURN INTEGER SEMICOLON RIGHT_KEY{
-		if(scopeOfFunction->next == NULL ||  !find_symbol(symbol, "main"))
-		{}
-		else{
-			char* variable = (char*)malloc(sizeof(char)*7);
-			strcpy(variable, "return");
-			symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _FUNCTION, 0, $2);
-			fprintf(file, "\nmov		eax, %d\n", $2);
-			fprintf(file, "pop		rbp\n");
-			fprintf(file, "ret\n");
-			fprintf(file, "\n.LFE0:\n.Letext0:\n.Ldebug_info0:\n.Ldebug_abbrev0:\n.Ldebug_line0:\n.LASF1:\n.LASF2:\n.LASF0:\n");
+		else if(take_last(symbol, _FUNCTION)){
+			if(take_last(symbol, _RETURN)){
+				this_symbol = take_last(symbol, _RETURN);
+				symbol = delete_symbol(symbol, this_symbol);
+				this_symbol = take_last(symbol, _FUNCTION);
+				symbol = delete_symbol(symbol, this_symbol);
+			} else {
+				printf("erro: a funcao %s espera um retorno\n", take_last(symbol, _FUNCTION)->symbol);
+			}
 		}
 	}
 	| INITIAL_COMMENT {
 		comment = true;
 	} Input END_COMMENT {
 		comment = false;
+	}
+	;
+
+Function:
+	INT VARIABLE LEFT_PARENTHESIS RIGHT_PARENTHESIS {
+		char* variable = (char*)malloc(sizeof(strlen($2)));
+		strcpy(variable, $2);
+		if(!strcmp(scopeOfFunction->scope, "global")){
+			symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _FUNCTION, function, 0);
+			fprintf(file, "\n%s:\n", variable);
+			fprintf(file, ".LFB%d:\n", function);
+			fprintf(file, "push	rbp\n");
+			fprintf(file, "mov rbp, rsp\n\n");
+			function++;
+		} else {
+			//Funcao Declarada fora de escopo
+		}
+	}
+	| RETURN INTEGER SEMICOLON {
+			char* variable = (char*)malloc(sizeof(char)*7);
+			strcpy(variable, "return");
+			this_symbol = take_last(symbol, _FUNCTION);
+			if(this_symbol){
+				symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _RETURN, 0, $2);
+				fprintf(file, "\nmov		eax, %d\n", $2);
+				fprintf(file, "pop		rbp\n");
+				fprintf(file, "ret\n");
+				fprintf(file, ".LFE%d:\n", this_symbol->word);
+				//fprintf(file, "\n.LFE0:\n.Letext0:\n.Ldebug_info0:\n.Ldebug_abbrev0:\n.Ldebug_line0:\n.LASF1:\n.LASF2:\n.LASF0:\n");
+			} else {
+				//Retorno sem funcao
+			}
+	}
+	| RETURN VARIABLE SEMICOLON {
+			char* variable = (char*)malloc(sizeof(char)*7);
+			strcpy(variable, "return");
+			this_symbol = take_last(symbol, _FUNCTION);
+			if(this_symbol){
+				this_variable = take_symbol(symbol, $2);
+				symbol = insert_symbol(symbol, variable, scopeOfFunction->scope, _RETURN, 0, this_variable->value);
+				fprintf(file, "\nmov		eax, %d\n", this_variable->value);
+				fprintf(file, "pop		rbp\n");
+				fprintf(file, "ret\n");
+				fprintf(file, ".LFE%d:\n", this_symbol->word);
+				//fprintf(file, "\n.LFE0:\n.Letext0:\n.Ldebug_info0:\n.Ldebug_abbrev0:\n.Ldebug_line0:\n.LASF1:\n.LASF2:\n.LASF0:\n");
+			} else {
+				//Retorno sem funcao
+			}
 	}
 	;
 
@@ -831,7 +867,7 @@ void yyerror(char *s) {
 }
 
 int main(void) {
-
+	int err;
 	symbol = create_list();
 	scopeOfFunction = create_stack();
 	scopeOfFunction = insert_scope(scopeOfFunction, "global");
@@ -847,7 +883,6 @@ int main(void) {
 	fprintf(file, ".Ltext0:\n\n");
 
 	yyparse();
-
 
 	fclose(file);
 	fclose(fileIn);

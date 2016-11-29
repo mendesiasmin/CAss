@@ -5,6 +5,10 @@
 #include <stdlib.h>
 #include "symbol_table.h"
 #include "stack.h"
+
+extern FILE *file;
+extern int function;
+
 %}
 
 white [ \t]+
@@ -16,8 +20,14 @@ variable ({word}|_)({word}|integer|_)*
 
 %%
 
+<<EOF>> {
+	fprintf(file, "\n.Letext0:\n.Ldebug_info0:\n.Ldebug_abbrev0:\n.Ldebug_line0:\n");
+	for(int i = 0; i <= 2*function; i++){
+		fprintf(file, ".LASF%d:\n", i);
+	}
+	exit(0);
+}
 "int" return (INT);
-"main" return (MAIN);
 "return" return (RETURN);
 "for" return (FOR);
 "if" return (IF);
@@ -53,8 +63,8 @@ variable ({word}|_)({word}|integer|_)*
 "*/" return (END_COMMENT);
 
 {variable} {
-	yylval.stringValue = malloc(strlen(yytext));
-	strncpy(yylval.stringValue, yytext, strlen(yytext));
+	yylval.stringValue = malloc(sizeof(char)*(strlen(yytext)+1));
+	strncpy(yylval.stringValue, yytext, strlen(yytext)+1);
 	return(VARIABLE);
 }
 {integer} {
@@ -66,6 +76,6 @@ variable ({word}|_)({word}|integer|_)*
 
 %%
 
-yywrap () {
-	exit(0);
+int yywrap() {
+	return 1;
 }

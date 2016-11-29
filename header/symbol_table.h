@@ -12,6 +12,7 @@
 #define _SWITCH 4
 #define _WHILE 5
 #define _FOR 6
+#define _RETURN 7
 
 #endif
 typedef struct Node node;
@@ -23,7 +24,6 @@ struct Node {
 	int type;
 	int word;
 	int value;
-	int conditional;
 	node *next;
 	node *previous;
 };
