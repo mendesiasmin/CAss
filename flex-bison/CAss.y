@@ -29,7 +29,6 @@
 	int l = 2;
 	int n = 0;
 	int comment = false;
-
 %}
 
 %union
@@ -414,6 +413,19 @@ Expression:
 		}
 	}
   ;
+If_statement:
+	IF Conditional {
+		fprintf(file, "if\n");
+	}
+	| ELSE_IF Conditional{
+		fprintf(file, "else if\n");
+	}
+	| ELSE{
+		fprintf(file, "else\n");
+	}
+	| If_statement LEFT_KEY {
+		fprintf(file, "{}\n");
+	}
 
 If_statement:
 	IF Conditional {

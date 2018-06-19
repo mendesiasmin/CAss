@@ -4,6 +4,7 @@ CAss: flex-bison/CAss.l flex-bison/CAss.y
 	mv CAss.tab.c outputs/sintatico.c
 	flex flex-bison/CAss.l
 	mv lex.yy.c outputs/lexico.c
+
 	gcc -o CAss outputs/sintatico.c outputs/lexico.c source/symbol_table.c source/stack.c -I ./header/ -g
 
 clean:
