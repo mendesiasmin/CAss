@@ -1,0 +1,12 @@
+Algumas Considerações
+
+  - Os arquivos in.txt e compilado.txt devem ser previamente criados
+  - Todo o código deve conter as chaves abrindo e fechando, na chamada de estruturas de decisão, laços de repetição e declaração de funções.
+
+Tratamento de Erros
+  - O compilador imprime alguns erros como a falta de um ponto vírgulo, parentesis, entre outros.
+  - As variáveis devem ser previamente declaradas antes, com atenção.
+
+Funções
+  - As funções declaradas devem ser simples, não recebem nenhum parâmetro, e devem sempre retornar um inteiro ou uma variável.
+  - Não é possível chamar as funções na main, somente declará-las
